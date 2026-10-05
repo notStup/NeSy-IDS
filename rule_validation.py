@@ -13,7 +13,8 @@ def validate_rules(
     x_val,
     y_val_one,
     min_precision=0.85,
-    min_support=3
+    min_support=3,
+    shap_allowed_features=None
 ):
 
     # Il modello passa tensori TensorFlow; le regole vengono valutate
@@ -81,7 +82,62 @@ def validate_rules(
     # Valutazione individuale delle regole
     # --------------------------------------------------------
 
-    for rule_index, rule in enumerate(attack_rules, start=1):
+    def extract_rule_features(rule):
+        """
+        Estrae gli indici delle feature utilizzate dalla regola.
+
+        Le feature nella struttura delle regole CapsRule sono
+        rappresentate come interi/numpy interi.
+        L'ultima posizione contiene invece la classe della regola
+        e viene esclusa dal chiamante.
+        """
+
+        features = []
+
+        for token in rule[:-1]:
+
+            if isinstance(
+                token,
+                (int, np.integer)
+            ):
+
+                feature_index = int(token)
+
+                if 0 <= feature_index < 30:
+
+                    features.append(
+                        feature_index
+                    )
+
+        return sorted(
+            set(features)
+        )
+    
+    for rule_index, rule in enumerate(attack_rules,start=1 ):
+
+        # ----------------------------------------------------
+        # SHAP FILTER
+        # ----------------------------------------------------
+
+        if shap_allowed_features is not None:
+
+            rule_features = extract_rule_features(
+                rule
+            )
+
+            # Regola non interpretabile / senza feature
+            if not rule_features:
+                continue
+
+            # La regola viene mantenuta solo se
+            # TUTTE le feature utilizzate sono tra
+            # quelle selezionate da SHAP.
+            if not all(
+                feature in shap_allowed_features
+                for feature in rule_features
+            ):
+
+                continue
 
         covered = 0
         true_attack = 0

@@ -2,18 +2,48 @@ import tensorflow as tf
 from tensorflow.keras import layers
 from pathlib import Path
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import precision_score, recall_score, f1_score
+
+import numpy as np
+import joblib
 
 from preprocessing import preprocess_dataset
 from squash import squash, safe_norm
 from rule_extraction import extract_rules_boundary
 from rule_validation import validate_rules
 from rule_evaluation import evaluate_rules_boundary
-import numpy as np
-import joblib
 from shap_guidance import (
     compute_attack_shap_importance,
-    get_top_shap_features
+    get_top_shap_features,
 )
+
+# ============================================================
+# ABLATION STUDY: SHAP vs NO-SHAP
+# ============================================================
+#
+# IMPORTANT:
+# This script trains the FFCN ONLY ONCE.
+# It then extracts ONE candidate Rule Set and evaluates it
+# twice:
+#
+#   A) without SHAP filtering
+#   B) with SHAP filtering
+#
+# Therefore both experiments use:
+#   - the same FFCN
+#   - the same best weights
+#   - the same train/validation/test split
+#   - the same extracted candidate rules
+#   - the same validation set
+#   - the same test set
+#
+# The only difference is the SHAP feature filter applied
+# during rule validation.
+#
+# This file is intentionally separate from the main experiment.
+# ============================================================
+
+
 # ============================================================
 # CONFIGURAZIONE
 # ============================================================
@@ -36,7 +66,6 @@ EPOCHS = 10
 RECONSTRUCTION_COEFFICIENT = 5.0e-15
 
 # Esperimento ridotto locale.
-# 0.001 = 0.1% del training originale.
 TRAIN_FRACTION = 0.005
 
 # Numero di flow utilizzati per la valutazione finale.
@@ -47,21 +76,28 @@ VALIDATION_FRACTION = 0.10
 
 RANDOM_STATE = 42
 
-# ============================================================
-# SHAP RULE FILTER
-# ============================================================
 
-USE_SHAP_RULE_FILTER = True
+# ============================================================
+# SHAP CONFIGURATION
+# ============================================================
 
 SHAP_BACKGROUND_SAMPLES = 100
-
 SHAP_EXPLAIN_SAMPLES = 500
-
 SHAP_NSAMPLES = 200
-
-# Hai 30 feature.
-# Partiamo conservativamente dalle migliori 20.
 SHAP_TOP_K = 20
+
+
+# ============================================================
+# RIPRODUCIBILITÀ
+# ============================================================
+
+tf.keras.utils.set_random_seed(RANDOM_STATE)
+
+try:
+    tf.config.experimental.enable_op_determinism()
+except Exception:
+    pass
+
 
 # ============================================================
 # DATASET
@@ -82,15 +118,12 @@ print("y_test:", y_test.shape)
 # ESPERIMENTO RIDOTTO
 # ============================================================
 
-# Riduciamo temporaneamente il training set per poter
-# effettuare l'esperimento sul computer locale.
-
 X_train, _, y_train, _ = train_test_split(
     X_train,
     y_train,
     train_size=TRAIN_FRACTION,
     random_state=RANDOM_STATE,
-    stratify=y_train
+    stratify=y_train,
 )
 
 print("\nTraining ridotto:")
@@ -98,18 +131,16 @@ print("X_train:", X_train.shape)
 print("y_train:", y_train.shape)
 
 
-# Creiamo esplicitamente un validation set.
-#
-# TRAIN → addestramento FFCN + estrazione regole
-# VAL   → validazione delle regole
-# TEST  → valutazione finale delle regole
+# ============================================================
+# TRAIN / VALIDATION
+# ============================================================
 
 X_train, X_val, y_train, y_val = train_test_split(
     X_train,
     y_train,
     test_size=VALIDATION_FRACTION,
     random_state=RANDOM_STATE,
-    stratify=y_train
+    stratify=y_train,
 )
 
 print("\nSuddivisione train / validation:")
@@ -119,17 +150,16 @@ print("y_train:", y_train.shape)
 print("y_val:", y_val.shape)
 
 
-# Riduciamo anche il test set.
-#
-# Il test resta completamente separato dal training e dalla
-# validation e viene usato soltanto per la valutazione finale.
+# ============================================================
+# TEST RIDOTTO
+# ============================================================
 
 X_test, _, y_test, _ = train_test_split(
     X_test,
     y_test,
     train_size=TEST_SAMPLES,
     random_state=RANDOM_STATE,
-    stratify=y_test
+    stratify=y_test,
 )
 
 print("\nTest ridotto:")
@@ -138,37 +168,66 @@ print("y_test:", y_test.shape)
 
 
 # ============================================================
+# SALVATAGGIO SPLIT CONGELATO
+# ============================================================
+#
+# Utile per documentare l'ablation study.
+# Non viene usato per cambiare il flusso: gli array già presenti
+# in memoria restano quelli usati da entrambi i rami.
+# ============================================================
+
+experiments_dir = Path("Experiments")
+experiments_dir.mkdir(parents=True, exist_ok=True)
+
+joblib.dump(
+    {
+        "X_train": X_train,
+        "y_train": y_train,
+        "X_val": X_val,
+        "y_val": y_val,
+        "X_test": X_test,
+        "y_test": y_test,
+        "random_state": RANDOM_STATE,
+        "train_fraction": TRAIN_FRACTION,
+        "validation_fraction": VALIDATION_FRACTION,
+        "test_samples": TEST_SAMPLES,
+    },
+    experiments_dir / "ablation_frozen_split.joblib",
+)
+
+
+# ============================================================
 # CONVERSIONE TENSORFLOW
 # ============================================================
 
 X_train = tf.convert_to_tensor(
     X_train.to_numpy(),
-    dtype=tf.float32
+    dtype=tf.float32,
 )
 
 X_val = tf.convert_to_tensor(
     X_val.to_numpy(),
-    dtype=tf.float32
+    dtype=tf.float32,
 )
 
 X_test = tf.convert_to_tensor(
     X_test.to_numpy(),
-    dtype=tf.float32
+    dtype=tf.float32,
 )
 
 y_train = tf.convert_to_tensor(
     y_train.to_numpy().reshape(-1),
-    dtype=tf.int32
+    dtype=tf.int32,
 )
 
 y_val = tf.convert_to_tensor(
     y_val.to_numpy().reshape(-1),
-    dtype=tf.int32
+    dtype=tf.int32,
 )
 
 y_test = tf.convert_to_tensor(
     y_test.to_numpy().reshape(-1),
-    dtype=tf.int32
+    dtype=tf.int32,
 )
 
 
@@ -176,21 +235,21 @@ y_test = tf.convert_to_tensor(
 # INPUT CAPSULE
 # ============================================================
 
-# (batch, 30) → (batch, 30, 1)
+# (batch, 30) -> (batch, 30, 1)
 
 X_train = tf.expand_dims(
     X_train,
-    axis=-1
+    axis=-1,
 )
 
 X_val = tf.expand_dims(
     X_val,
-    axis=-1
+    axis=-1,
 )
 
 X_test = tf.expand_dims(
     X_test,
-    axis=-1
+    axis=-1,
 )
 
 print("\nInput capsule:")
@@ -201,7 +260,7 @@ print("X_test:", X_test.shape)
 
 # ============================================================
 # CAPSULE LAYER
-# ==========================================================
+# ============================================================
 
 class CapsuleLayer(layers.Layer):
 
@@ -209,7 +268,7 @@ class CapsuleLayer(layers.Layer):
         self,
         num_capsules,
         capsule_dim,
-        routing_iterations=3
+        routing_iterations=3,
     ):
         super().__init__()
 
@@ -234,13 +293,13 @@ class CapsuleLayer(layers.Layer):
                 self.input_capsules,
                 self.num_capsules,
                 self.capsule_dim,
-                self.input_dim
+                self.input_dim,
             ),
             initializer=tf.keras.initializers.RandomNormal(
                 mean=0.0,
-                stddev=1.0
+                stddev=1.0,
             ),
-            trainable=True
+            trainable=True,
         )
 
     def call(self, inputs, training=False):
@@ -251,21 +310,21 @@ class CapsuleLayer(layers.Layer):
 
         inputs64 = tf.cast(
             inputs,
-            tf.float64
+            tf.float64,
         )
 
         W64 = tf.cast(
             tf.squeeze(
                 self.W,
-                axis=0
+                axis=0,
             ),
-            tf.float64
+            tf.float64,
         )
 
         caps_predicted = tf.einsum(
             "bid,ijod->bijo",
             inputs64,
-            W64
+            W64,
         )
 
         # ----------------------------------------------------
@@ -278,9 +337,9 @@ class CapsuleLayer(layers.Layer):
             (
                 batch_size,
                 self.input_capsules,
-                self.num_capsules
+                self.num_capsules,
             ),
-            dtype=tf.float64
+            dtype=tf.float64,
         )
 
         coupling_coefficients = None
@@ -294,7 +353,7 @@ class CapsuleLayer(layers.Layer):
 
             coupling_coefficients = tf.nn.softmax(
                 raw_weights,
-                axis=-1
+                axis=-1,
             )
 
             weighted_predictions = (
@@ -304,31 +363,33 @@ class CapsuleLayer(layers.Layer):
 
             weighted_sum = tf.reduce_sum(
                 weighted_predictions,
-                axis=1
+                axis=1,
             )
 
             caps_output = squash(
                 weighted_sum,
-                axis=-1
+                axis=-1,
             )
 
             agreement = tf.reduce_sum(
                 caps_predicted
                 * caps_output[:, tf.newaxis, :, :],
-                axis=-1
+                axis=-1,
             )
 
             raw_weights = (
                 raw_weights + agreement
             )
+
         # ----------------------------------------------------
         # COUPLING COEFFICIENTS FINALI
         # ----------------------------------------------------
 
         coupling_coefficients = tf.nn.softmax(
             raw_weights,
-            axis=-1
+            axis=-1,
         )
+
         # ----------------------------------------------------
         # Salvataggio dati per CapsRule
         # ----------------------------------------------------
@@ -347,7 +408,7 @@ class CapsuleLayer(layers.Layer):
 
         return tf.cast(
             caps_output,
-            inputs.dtype
+            inputs.dtype,
         )
 
 
@@ -365,32 +426,32 @@ class FFCN(tf.keras.Model):
             CapsuleLayer(
                 num_capsules=SIZE_LAYERS[0],
                 capsule_dim=CAPS_DIMS[0],
-                routing_iterations=ROUTING_ITERATIONS
+                routing_iterations=ROUTING_ITERATIONS,
             ),
 
             CapsuleLayer(
                 num_capsules=SIZE_LAYERS[1],
                 capsule_dim=CAPS_DIMS[1],
-                routing_iterations=ROUTING_ITERATIONS
+                routing_iterations=ROUTING_ITERATIONS,
             ),
 
             CapsuleLayer(
                 num_capsules=SIZE_LAYERS[2],
                 capsule_dim=CAPS_DIMS[2],
-                routing_iterations=ROUTING_ITERATIONS
+                routing_iterations=ROUTING_ITERATIONS,
             ),
 
             CapsuleLayer(
                 num_capsules=SIZE_LAYERS[3],
                 capsule_dim=CAPS_DIMS[3],
-                routing_iterations=ROUTING_ITERATIONS
+                routing_iterations=ROUTING_ITERATIONS,
             ),
 
             CapsuleLayer(
                 num_capsules=SIZE_LAYERS[4],
                 capsule_dim=CAPS_DIMS[4],
-                routing_iterations=ROUTING_ITERATIONS
-            )
+                routing_iterations=ROUTING_ITERATIONS,
+            ),
         ]
 
         # ----------------------------------------------------
@@ -401,23 +462,23 @@ class FFCN(tf.keras.Model):
 
             layers.Dense(
                 5,
-                activation="relu"
+                activation="relu",
             ),
 
             layers.Dense(
                 15,
-                activation="relu"
+                activation="relu",
             ),
 
             layers.Dense(
                 20,
-                activation="relu"
+                activation="relu",
             ),
 
             layers.Dense(
                 INPUT_SIZE,
-                activation="sigmoid"
-            )
+                activation="sigmoid",
+            ),
         ])
 
         # ----------------------------------------------------
@@ -447,7 +508,7 @@ class FFCN(tf.keras.Model):
             self.loss_tracker,
             self.margin_loss_tracker,
             self.reconstruction_loss_tracker,
-            self.accuracy_tracker
+            self.accuracy_tracker,
         ]
 
     def call(self, inputs, training=False):
@@ -458,7 +519,7 @@ class FFCN(tf.keras.Model):
 
             x = capsule_layer(
                 x,
-                training=training
+                training=training,
             )
 
         return x
@@ -467,7 +528,7 @@ class FFCN(tf.keras.Model):
 
         return safe_norm(
             capsule_output,
-            axis=-1
+            axis=-1,
         )
 
     def get_predictions(self, capsule_output):
@@ -479,19 +540,19 @@ class FFCN(tf.keras.Model):
         return tf.argmax(
             scores,
             axis=-1,
-            output_type=tf.int32
+            output_type=tf.int32,
         )
 
     def reconstruct(
         self,
         capsule_output,
-        y_true
+        y_true,
     ):
 
         y_one_hot = tf.one_hot(
             y_true,
             depth=N_CLASSES,
-            dtype=capsule_output.dtype
+            dtype=capsule_output.dtype,
         )
 
         mask = y_one_hot[..., tf.newaxis]
@@ -504,8 +565,8 @@ class FFCN(tf.keras.Model):
             masked_capsules,
             (
                 -1,
-                N_CLASSES * CAPS_DIMS[-1]
-            )
+                N_CLASSES * CAPS_DIMS[-1],
+            ),
         )
 
         return self.decoder(
@@ -516,25 +577,25 @@ class FFCN(tf.keras.Model):
         self,
         inputs,
         y_true,
-        capsule_output
+        capsule_output,
     ):
 
         margin = margin_loss(
             y_true,
-            capsule_output
+            capsule_output,
         )
 
         reconstruction_output = self.reconstruct(
             capsule_output,
-            y_true
+            y_true,
         )
 
         input_flat = tf.reshape(
             inputs,
             (
                 tf.shape(inputs)[0],
-                INPUT_SIZE
-            )
+                INPUT_SIZE,
+            ),
         )
 
         reconstruction_loss = tf.reduce_mean(
@@ -553,7 +614,7 @@ class FFCN(tf.keras.Model):
         return (
             total_loss,
             margin,
-            reconstruction_loss
+            reconstruction_loss,
         )
 
     def train_step(self, data):
@@ -563,37 +624,37 @@ class FFCN(tf.keras.Model):
         y_true = tf.cast(
             tf.reshape(
                 y_true,
-                [-1]
+                [-1],
             ),
-            tf.int32
+            tf.int32,
         )
 
         with tf.GradientTape() as tape:
 
             capsule_output = self(
                 inputs,
-                training=True
+                training=True,
             )
 
             (
                 total_loss,
                 margin,
-                reconstruction
+                reconstruction,
             ) = self.compute_losses(
                 inputs,
                 y_true,
-                capsule_output
+                capsule_output,
             )
 
         gradients = tape.gradient(
             total_loss,
-            self.trainable_variables
+            self.trainable_variables,
         )
 
         self.optimizer.apply_gradients(
             zip(
                 gradients,
-                self.trainable_variables
+                self.trainable_variables,
             )
         )
 
@@ -605,9 +666,9 @@ class FFCN(tf.keras.Model):
             tf.cast(
                 tf.equal(
                     predictions,
-                    y_true
+                    y_true,
                 ),
-                tf.float32
+                tf.float32,
             )
         )
 
@@ -628,12 +689,14 @@ class FFCN(tf.keras.Model):
         )
 
         return {
-            "loss": self.loss_tracker.result(),
-            "margin_loss": self.margin_loss_tracker.result(),
+            "loss":
+                self.loss_tracker.result(),
+            "margin_loss":
+                self.margin_loss_tracker.result(),
             "reconstruction_loss":
                 self.reconstruction_loss_tracker.result(),
             "accuracy":
-                self.accuracy_tracker.result()
+                self.accuracy_tracker.result(),
         }
 
     def test_step(self, data):
@@ -643,24 +706,24 @@ class FFCN(tf.keras.Model):
         y_true = tf.cast(
             tf.reshape(
                 y_true,
-                [-1]
+                [-1],
             ),
-            tf.int32
+            tf.int32,
         )
 
         capsule_output = self(
             inputs,
-            training=False
+            training=False,
         )
 
         (
             total_loss,
             margin,
-            reconstruction
+            reconstruction,
         ) = self.compute_losses(
             inputs,
             y_true,
-            capsule_output
+            capsule_output,
         )
 
         predictions = self.get_predictions(
@@ -671,9 +734,9 @@ class FFCN(tf.keras.Model):
             tf.cast(
                 tf.equal(
                     predictions,
-                    y_true
+                    y_true,
                 ),
-                tf.float32
+                tf.float32,
             )
         )
 
@@ -694,11 +757,14 @@ class FFCN(tf.keras.Model):
         )
 
         return {
-            "loss": self.loss_tracker.result(),
-            "margin_loss": self.margin_loss_tracker.result(),
+            "loss":
+                self.loss_tracker.result(),
+            "margin_loss":
+                self.margin_loss_tracker.result(),
             "reconstruction_loss":
                 self.reconstruction_loss_tracker.result(),
-            "accuracy": self.accuracy_tracker.result()
+            "accuracy":
+                self.accuracy_tracker.result(),
         }
 
 
@@ -708,21 +774,21 @@ class FFCN(tf.keras.Model):
 
 def margin_loss(
     y_true,
-    y_pred
+    y_pred,
 ):
 
     capsule_lengths = safe_norm(
         y_pred,
-        axis=-1
+        axis=-1,
     )
 
     y_true = tf.one_hot(
         tf.cast(
             y_true,
-            tf.int32
+            tf.int32,
         ),
         depth=N_CLASSES,
-        dtype=capsule_lengths.dtype
+        dtype=capsule_lengths.dtype,
     )
 
     m_plus = 0.9
@@ -734,7 +800,7 @@ def margin_loss(
         * tf.square(
             tf.maximum(
                 0.0,
-                m_plus - capsule_lengths
+                m_plus - capsule_lengths,
             )
         )
     )
@@ -745,7 +811,7 @@ def margin_loss(
         * tf.square(
             tf.maximum(
                 0.0,
-                capsule_lengths - m_minus
+                capsule_lengths - m_minus,
             )
         )
     )
@@ -753,7 +819,7 @@ def margin_loss(
     return tf.reduce_mean(
         tf.reduce_sum(
             positive_loss + negative_loss,
-            axis=-1
+            axis=-1,
         )
     )
 
@@ -764,10 +830,9 @@ def margin_loss(
 
 model = FFCN()
 
-# Build esplicito
 dummy_output = model(
     X_train[:BATCH_SIZE],
-    training=False
+    training=False,
 )
 
 print("\nOutput FFCN:", dummy_output.shape)
@@ -780,7 +845,7 @@ print("\nOutput FFCN:", dummy_output.shape)
 model.compile(
     optimizer=tf.keras.optimizers.Adam(
         learning_rate=LEARNING_RATE,
-        global_clipnorm=1.0
+        global_clipnorm=1.0,
     )
 )
 
@@ -792,67 +857,52 @@ model.compile(
 models_dir = Path("models")
 models_dir.mkdir(
     parents=True,
-    exist_ok=True
+    exist_ok=True,
 )
 
 checkpoint_path = (
-    models_dir / "best_ffcn.weights.h5"
+    models_dir / "ablation_best_ffcn.weights.h5"
 )
 
 checkpoint = tf.keras.callbacks.ModelCheckpoint(
-
     filepath=str(checkpoint_path),
-
     monitor="val_loss",
-
     mode="min",
-
     save_best_only=True,
-
     save_weights_only=True,
-
-    verbose=1
+    verbose=1,
 )
 
 early_stopping = tf.keras.callbacks.EarlyStopping(
-
     monitor="val_loss",
-
     mode="min",
-
     patience=10,
-
     restore_best_weights=True,
-
-    verbose=1
+    verbose=1,
 )
 
 
 # ============================================================
-# TRAINING FFCN
+# TRAINING FFCN - UNA SOLA VOLTA
 # ============================================================
 
-print("\n=== TRAINING FFCN ===")
+print("\n============================================================")
+print("=== TRAINING FFCN - UNA SOLA VOLTA PER ABLATION STUDY ===")
+print("============================================================")
 
 history = model.fit(
-
     X_train,
-
     y_train,
-
     validation_data=(
         X_val,
-        y_val
+        y_val,
     ),
-
     epochs=EPOCHS,
-
     batch_size=BATCH_SIZE,
-
     callbacks=[
         checkpoint,
-        early_stopping
-    ]
+        early_stopping,
+    ],
 )
 
 
@@ -864,18 +914,19 @@ model.load_weights(
     str(checkpoint_path)
 )
 
-print("\n######## DIAGNOSTICA FFCN VERSIONE NUOVA ########")
-print("File eseguito:", Path(__file__).resolve())
+print("\n=== FFCN BEST MODEL CARICATO ===")
+print("Checkpoint:", checkpoint_path.resolve())
+
 
 # ============================================================
-# DIAGNOSTICA PREDIZIONI FFCN
+# PREDIZIONI FFCN
 # ============================================================
 
 print("\n=== DIAGNOSTICA FFCN ===")
 
 val_output = model(
     X_val,
-    training=False
+    training=False,
 )
 
 val_predictions = (
@@ -887,7 +938,7 @@ val_predictions = (
 
 test_output = model(
     X_test,
-    training=False
+    training=False,
 )
 
 test_predictions = (
@@ -951,6 +1002,7 @@ print(
     int(np.sum(test_predictions == 1))
 )
 
+
 # ============================================================
 # EVALUATION FFCN SUL TEST
 # ============================================================
@@ -958,14 +1010,10 @@ print(
 print("\n=== TEST FFCN ===")
 
 ffcn_test_results = model.evaluate(
-
     X_test,
-
     y_test,
-
     batch_size=BATCH_SIZE,
-
-    return_dict=True
+    return_dict=True,
 )
 
 print("\nRisultati FFCN:")
@@ -981,29 +1029,27 @@ for name, value in ffcn_test_results.items():
 # METRICHE FFCN - CLASSE ATTACK
 # ============================================================
 
-from sklearn.metrics import precision_score, recall_score, f1_score
-
 y_test_np = y_test.numpy()
 
 ffcn_precision = precision_score(
     y_test_np,
     test_predictions,
     pos_label=1,
-    zero_division=0
+    zero_division=0,
 )
 
 ffcn_recall = recall_score(
     y_test_np,
     test_predictions,
     pos_label=1,
-    zero_division=0
+    zero_division=0,
 )
 
 ffcn_f1 = f1_score(
     y_test_np,
     test_predictions,
     pos_label=1,
-    zero_division=0
+    zero_division=0,
 )
 
 print("\n=== FFCN ATTACK METRICS ===")
@@ -1020,62 +1066,54 @@ print(
     f"F1: {ffcn_f1:.4f}"
 )
 
+
 # ============================================================
 # SHAP GLOBAL FEATURE IMPORTANCE
 # ============================================================
+#
+# SHAP viene calcolato una sola volta sullo stesso FFCN che verrà
+# usato per estrarre il Rule Set.
+#
+# IMPORTANTE:
+# il ramo NO-SHAP NON viene ottenuto riaddestrando il modello.
+# ============================================================
 
-shap_allowed_features = None
+print(
+    "\n=== SHAP FEATURE IMPORTANCE ==="
+)
 
-if USE_SHAP_RULE_FILTER:
+(
+    shap_importance,
+    shap_ranking,
+) = compute_attack_shap_importance(
+    model,
+    X_train,
+    y_train,
+    background_samples=SHAP_BACKGROUND_SAMPLES,
+    explain_samples=SHAP_EXPLAIN_SAMPLES,
+    nsamples=SHAP_NSAMPLES,
+    random_state=RANDOM_STATE,
+)
 
-    print(
-        "\n=== SHAP FEATURE IMPORTANCE ==="
-    )
-
-    (
+shap_allowed_features = (
+    get_top_shap_features(
         shap_importance,
-        shap_ranking
-    ) = compute_attack_shap_importance(
-
-        model,
-
-        X_train,
-
-        y_train,
-
-        background_samples=(
-            SHAP_BACKGROUND_SAMPLES
-        ),
-
-        explain_samples=(
-            SHAP_EXPLAIN_SAMPLES
-        ),
-
-        nsamples=(
-            SHAP_NSAMPLES
-        ),
-
-        random_state=RANDOM_STATE
+        SHAP_TOP_K,
     )
+)
 
-    shap_allowed_features = (
-        get_top_shap_features(
-            shap_importance,
-            SHAP_TOP_K
-        )
+print("\nTop feature SHAP:")
+
+for rank, feature_index in enumerate(
+    shap_ranking[:SHAP_TOP_K],
+    start=1,
+):
+
+    feature_name = (
+        selected_features[feature_index]
+        if feature_index < len(selected_features)
+        else f"Feature {feature_index}"
     )
-
-    print(
-        "\nTop feature SHAP:"
-    )
-
-    for rank, feature_index in enumerate(shap_ranking[:SHAP_TOP_K],start=1):
-
-        feature_name = (
-            selected_features[feature_index]
-            if feature_index < len(selected_features)
-            else f"Feature {feature_index}"
-        )
 
     print(
         f"{rank}. "
@@ -1085,40 +1123,47 @@ if USE_SHAP_RULE_FILTER:
         f"{shap_importance[feature_index]:.6f}"
     )
 
-    print(
-        "\nFeature utilizzabili dalle ATTACK rules:",
-        sorted(shap_allowed_features)
-    )
-    
-experiments_dir = Path(
-    "Experiments"
+print(
+    "\nFeature utilizzabili dalle ATTACK rules:",
+    sorted(shap_allowed_features),
 )
 
-experiments_dir.mkdir(
-    parents=True,
-    exist_ok=True
+
+# ============================================================
+# SALVATAGGIO SHAP
+# ============================================================
+
+shap_results = {
+    "importance": shap_importance,
+    "ranking": shap_ranking,
+    "top_k": SHAP_TOP_K,
+    "allowed_features": sorted(
+        shap_allowed_features
+    ),
+}
+
+joblib.dump(
+    shap_results,
+    experiments_dir / "ablation_shap_feature_importance.joblib",
 )
 
-if USE_SHAP_RULE_FILTER:
 
-    shap_results = {
-        "importance": shap_importance,
-        "ranking": shap_ranking,
-        "top_k": SHAP_TOP_K,
-        "allowed_features": sorted(
-            shap_allowed_features
-        )
-    }
-
-    joblib.dump(
-        shap_results,
-        experiments_dir / "shap_feature_importance.joblib"
-    )
 # ============================================================
-# ESTRAZIONE CAPSRule DAL TRAINING
+# ESTRAZIONE CAPSRule
+# ============================================================
+#
+# QUESTA PARTE VIENE ESEGUITA UNA SOLA VOLTA.
+#
+# Il Rule Set ottenuto qui è il Rule Set candidato comune
+# ai due esperimenti:
+#
+#   NO SHAP
+#   SHAP
 # ============================================================
 
-print("\n=== ESTRAZIONE CAPSRule ===")
+print("\n============================================================")
+print("=== ESTRAZIONE CAPSRule - UNA SOLA VOLTA ===")
+print("============================================================")
 
 rule_set = []
 
@@ -1129,7 +1174,7 @@ num_training_batches = (
 
 print(
     "Batch di training da elaborare:",
-    num_training_batches
+    num_training_batches,
 )
 
 
@@ -1137,14 +1182,14 @@ for batch_number, start in enumerate(
     range(
         0,
         len(X_train),
-        BATCH_SIZE
+        BATCH_SIZE,
     ),
-    start=1
+    start=1,
 ):
 
     end = min(
         start + BATCH_SIZE,
-        len(X_train)
+        len(X_train),
     )
 
     X_batch = X_train[start:end]
@@ -1153,7 +1198,7 @@ for batch_number, start in enumerate(
     # NON modifica i pesi.
     capsule_output = model(
         X_batch,
-        training=False
+        training=False,
     )
 
     # --------------------------------------------------------
@@ -1184,16 +1229,11 @@ for batch_number, start in enumerate(
     # --------------------------------------------------------
 
     batch_rules = extract_rules_boundary(
-
         X_batch.numpy(),
-
         coupl_coeff,
-
         pred_vect,
-
         out_vect,
-
-        pred
+        pred,
     )
 
     rule_set.append(
@@ -1207,119 +1247,233 @@ for batch_number, start in enumerate(
 
 
 # ============================================================
-# SALVATAGGIO RULE SET INIZIALE
+# SALVATAGGIO RULE SET COMUNE
 # ============================================================
 
-experiments_dir = Path("Experiments")
-experiments_dir.mkdir(
-    parents=True,
-    exist_ok=True
-)
-
-import joblib
-
 rule_set_path = (
-    experiments_dir / "rule_set_initial.joblib"
+    experiments_dir / "ablation_rule_set_initial.joblib"
 )
 
 joblib.dump(
     rule_set,
-    rule_set_path
+    rule_set_path,
 )
 
 selected_features_path = (
-    experiments_dir / "selected_features.joblib"
+    experiments_dir / "ablation_selected_features.joblib"
 )
 
 joblib.dump(
     selected_features,
-    selected_features_path
+    selected_features_path,
 )
 
-
 print(
-    "\nRule set salvato in:",
-    rule_set_path
+    "\nRule set comune salvato in:",
+    rule_set_path,
 )
 
 print(
     "Feature selezionate salvate in:",
-    selected_features_path
+    selected_features_path,
 )
 
 print(
     "Numero gruppi estratti:",
-    len(rule_set)
+    len(rule_set),
 )
 
 
 # ============================================================
-# VALIDAZIONE DELLE REGOLE
+# PREPARAZIONE LABEL ONE-HOT PER LA VALIDAZIONE
 # ============================================================
-
-print("\n=== VALIDAZIONE REGOLE ===")
-
-# rule_validation.py dell'autore si aspetta label one-hot.
-# La nostra pipeline usa internamente 0/1, quindi convertiamo
-# solo qui senza modificare le label del modello.
 
 y_val_one_hot = tf.one_hot(
     y_val,
-    depth=N_CLASSES
+    depth=N_CLASSES,
 ).numpy()
 
-validated_rules = validate_rules(
+
+# ============================================================
+# ABLATION A: NO SHAP
+# ============================================================
+#
+# STESSO:
+#   - FFCN
+#   - Rule Set
+#   - validation set
+#   - threshold precision
+#   - threshold support
+#
+# DIFFERENZA:
+#   shap_allowed_features = None
+# ============================================================
+
+print("\n============================================================")
+print("=== ABLATION A: FFCN + ATTACK RULES SENZA SHAP ===")
+print("============================================================")
+
+validated_rules_no_shap = validate_rules(
     rule_set,
     X_val.numpy(),
     y_val_one_hot,
     min_precision=0.85,
     min_support=3,
-    shap_allowed_features=shap_allowed_features
+    shap_allowed_features=None,
 )
 
 print(
-    "\nRegole validate:",
-    len(validated_rules)
+    "\nRegole validate NO SHAP:",
+    len(validated_rules_no_shap),
 )
 
-
-# ============================================================
-# SALVATAGGIO REGOLE VALIDATE
-# ============================================================
-
-validated_rules_path = (
-    experiments_dir / "validated_rules_initial.joblib"
+validated_rules_no_shap_path = (
+    experiments_dir / "ablation_validated_rules_no_shap.joblib"
 )
 
 joblib.dump(
-    validated_rules,
-    validated_rules_path
+    validated_rules_no_shap,
+    validated_rules_no_shap_path,
 )
 
 print(
-    "Regole validate salvate in:",
-    validated_rules_path
+    "Regole NO SHAP salvate in:",
+    validated_rules_no_shap_path,
 )
 
 
 # ============================================================
-# EVALUATION DELLE REGOLE SUL TEST
+# TEST A: HYBRID NO SHAP
 # ============================================================
-
-print("\n=== TEST DELLE REGOLE ===")
 
 y_test_one_hot = tf.one_hot(
     y_test,
-    depth=N_CLASSES
+    depth=N_CLASSES,
 ).numpy()
 
+print("\n============================================================")
+print("=== TEST HYBRID NO SHAP ===")
+print("============================================================")
+
 evaluate_rules_boundary(
-    validated_rules,
+    validated_rules_no_shap,
     X_test.numpy(),
     y_test_one_hot,
-    ffcn_predictions=test_predictions
+    ffcn_predictions=test_predictions,
 )
 
 print(
-    "\nEvaluation delle regole completata."
+    "\nEvaluation Hybrid NO SHAP completata."
 )
+
+
+# ============================================================
+# ABLATION B: SHAP
+# ============================================================
+#
+# STESSO:
+#   - FFCN
+#   - Rule Set
+#   - validation set
+#   - threshold precision
+#   - threshold support
+#
+# DIFFERENZA:
+#   viene applicato il filtro SHAP sulle feature delle ATTACK
+#   rules.
+# ============================================================
+
+print("\n============================================================")
+print("=== ABLATION B: FFCN + ATTACK RULES CON SHAP ===")
+print("============================================================")
+
+validated_rules_shap = validate_rules(
+    rule_set,
+    X_val.numpy(),
+    y_val_one_hot,
+    min_precision=0.85,
+    min_support=3,
+    shap_allowed_features=shap_allowed_features,
+)
+
+print(
+    "\nRegole validate SHAP:",
+    len(validated_rules_shap),
+)
+
+validated_rules_shap_path = (
+    experiments_dir / "ablation_validated_rules_shap.joblib"
+)
+
+joblib.dump(
+    validated_rules_shap,
+    validated_rules_shap_path,
+)
+
+print(
+    "Regole SHAP salvate in:",
+    validated_rules_shap_path,
+)
+
+
+# ============================================================
+# TEST B: HYBRID SHAP
+# ============================================================
+
+print("\n============================================================")
+print("=== TEST HYBRID SHAP ===")
+print("============================================================")
+
+evaluate_rules_boundary(
+    validated_rules_shap,
+    X_test.numpy(),
+    y_test_one_hot,
+    ffcn_predictions=test_predictions,
+)
+
+print(
+    "\nEvaluation Hybrid SHAP completata."
+)
+
+
+# ============================================================
+# RIEPILOGO ABLATION
+# ============================================================
+
+print("\n============================================================")
+print("=== RIEPILOGO ABLATION STUDY ===")
+print("============================================================")
+
+print("\nFFCΝ COMUNE A ENTRAMBI:")
+print(f"Precision: {ffcn_precision:.4f}")
+print(f"Recall:    {ffcn_recall:.4f}")
+print(f"F1:        {ffcn_f1:.4f}")
+
+print("\nRULE SET CANDIDATO COMUNE:")
+print(
+    "Gruppi di regole estratti:",
+    len(rule_set),
+)
+
+print("\nNO SHAP:")
+print(
+    "Regole validate:",
+    len(validated_rules_no_shap),
+)
+
+print("\nSHAP:")
+print(
+    "Regole validate:",
+    len(validated_rules_shap),
+)
+
+print("\n============================================================")
+print("IMPORTANTE: NO SHAP e SHAP hanno usato LO STESSO:")
+print("- FFCN addestrato")
+print("- best checkpoint")
+print("- train/validation/test split")
+print("- Rule Set candidato")
+print("- soglia min_precision")
+print("- soglia min_support")
+print("- test set")
+print("============================================================")
