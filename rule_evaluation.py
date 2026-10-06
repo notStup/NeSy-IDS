@@ -1,12 +1,9 @@
-import sys
-from io import StringIO
-
 import numpy as np
+from sklearn.metrics import precision_score, recall_score, f1_score
 
 from Performance_measures import (
     confusion_metrics_basic,
     Micro_calculate_measures,
-    Macro_calculate_measures_basic,
 )
 
 
@@ -18,6 +15,162 @@ N_CLASSES = 2
 
 # 0 = BENIGN
 # 1 = ATTACK
+ATTACK_CLASS = 1
+
+
+# ============================================================
+# CONVERSIONE SCALARE
+# ============================================================
+
+def to_scalar(value):
+    """
+    Converte un valore eventualmente rappresentato come:
+
+        12.5
+        [12.5]
+        np.array([12.5])
+        np.array([[12.5]])
+
+    in un float.
+    """
+
+    if isinstance(value, str):
+
+        value = value.strip()
+
+        if value.startswith("[") and value.endswith("]"):
+            value = value[1:-1].strip()
+
+    array = np.asarray(
+        value,
+        dtype=float
+    ).reshape(-1)
+
+    if len(array) == 0:
+        raise ValueError(
+            "Impossibile convertire il valore in scalare."
+        )
+
+    return float(array[0])
+
+
+# ============================================================
+# MATCHING DELLA REGOLA
+# ============================================================
+
+def rule_matches(rule, sample):
+    """
+    Verifica se un campione soddisfa una regola.
+
+    Formato atteso:
+
+        [
+            "(",
+            min_value,
+            "<=",
+            feature_name,
+            "Feature:",
+            feature_index,
+            "<=",
+            max_value,
+            "and",
+            ...,
+            ")",
+            class_label
+        ]
+
+    Esempio:
+
+        [
+            "(",
+            "1548.67",
+            "<=",
+            "Bwd Packet Length Std",
+            "Feature:",
+            20,
+            "<=",
+            "5790.16",
+            ")",
+            1
+        ]
+
+    corrisponde a:
+
+        1548.67 <= sample[20] <= 5790.16
+    """
+
+    i = 1
+
+    while i < len(rule) - 1:
+
+        # Fine della regola
+        if rule[i] == ")":
+            break
+
+        # ----------------------------------------------------
+        # Struttura della condizione
+        #
+        # i     = minimum
+        # i + 1 = <=
+        # i + 2 = feature name
+        # i + 3 = Feature:
+        # i + 4 = feature index
+        # i + 5 = <=
+        # i + 6 = maximum
+        # ----------------------------------------------------
+
+        try:
+
+            minimum = to_scalar(
+                rule[i]
+            )
+
+            feature_index = int(
+                rule[i + 4]
+            )
+
+            maximum = to_scalar(
+                rule[i + 6]
+            )
+
+            value = to_scalar(
+                sample[feature_index]
+            )
+
+        except (
+            ValueError,
+            TypeError,
+            IndexError
+        ):
+
+            return False
+
+        # ----------------------------------------------------
+        # Valutazione intervallo
+        # ----------------------------------------------------
+
+        if not (
+            minimum
+            <= value
+            <= maximum
+        ):
+
+            return False
+
+        # ----------------------------------------------------
+        # Passiamo alla condizione successiva
+        # ----------------------------------------------------
+
+        i += 7
+
+        if (
+            i < len(rule) - 1
+            and rule[i] == "and"
+        ):
+
+            i += 1
+
+    return True
 
 
 # ============================================================
@@ -38,8 +191,6 @@ def evaluate_rules_boundary(
 
     La coverage misura la percentuale di campioni
     sui quali almeno una ATTACK rule viene attivata.
-
-    Le metriche finali sono calcolate sull'intero test set.
     """
 
     # ========================================================
@@ -49,7 +200,9 @@ def evaluate_rules_boundary(
     if hasattr(x_test, "numpy"):
         x_test = x_test.numpy()
 
-    x_test = np.asarray(x_test)
+    x_test = np.asarray(
+        x_test
+    )
 
     # ========================================================
     # CONVERSIONE LABEL
@@ -90,7 +243,10 @@ def evaluate_rules_boundary(
             "per la valutazione ibrida."
         )
 
-    if hasattr(ffcn_predictions, "numpy"):
+    if hasattr(
+        ffcn_predictions,
+        "numpy"
+    ):
 
         ffcn_predictions = (
             ffcn_predictions.numpy()
@@ -111,7 +267,6 @@ def evaluate_rules_boundary(
     # REGOLE
     # ========================================================
 
-    # validated_rules è già una lista piatta.
     rules = list(rules)
 
     print(
@@ -123,125 +278,75 @@ def evaluate_rules_boundary(
     # ARRAY RISULTATI
     # ========================================================
 
-    # Partiamo dalla predizione della FFCN.
+    # Partiamo dalle predizioni FFCN.
     y_pred = ffcn_predictions.copy()
 
-    # True quando almeno una ATTACK rule
-    # è stata attivata sul campione.
+    # True se almeno una ATTACK rule
+    # viene attivata.
     rule_covered_mask = np.zeros(
         len(y_test),
         dtype=bool
     )
 
-    # Numero di override della FFCN
-    # effettuati dalle regole.
+    # Numero totale di override FFCN.
     rule_override_count = 0
 
-    # Numero di override sui campioni che
-    # la FFCN aveva classificato BENIGN.
+    # Numero di casi:
+    # FFCN = BENIGN
+    # Rule = ATTACK
     benign_to_attack_count = 0
 
     # ========================================================
     # EVALUATION CAMPIONI
     # ========================================================
 
-    for sample_index, x in enumerate(x_test):
+    for sample_index, sample in enumerate(
+        x_test
+    ):
 
         attack_rule_matches = False
 
-        for original_rule in rules:
+        # ----------------------------------------------------
+        # Proviamo tutte le ATTACK rules
+        # ----------------------------------------------------
+
+        for rule in rules:
 
             # ------------------------------------------------
-            # Le regole attive devono essere ATTACK rules.
+            # Consideriamo solo ATTACK rules
             # ------------------------------------------------
 
-            rule_label = int(
-                original_rule[-1]
-            )
+            if (
+                not isinstance(rule, (list, tuple))
+                or len(rule) < 2
+            ):
 
-            if rule_label != 1:
                 continue
-
-            # Copia della regola.
-            rl = list(
-                original_rule[:-1]
-            )
-
-            # ------------------------------------------------
-            # Sostituzione feature index -> valore del flow
-            # ------------------------------------------------
-
-            i = 3
-
-            while i < len(rl) - 1:
-
-                try:
-
-                    feature_index = int(
-                        rl[i]
-                    )
-
-                    rl[i] = str(
-                        x[feature_index]
-                    )
-
-                    i += 6
-
-                except (
-                    ValueError,
-                    TypeError,
-                    IndexError
-                ):
-
-                    break
-
-            # ------------------------------------------------
-            # Valutazione della regola
-            # ------------------------------------------------
-
-            flg_rule = False
 
             try:
 
-                str_rule = (
-                    "if ("
-                    + " ".join(rl)
-                    + "):\n"
-                    + "\tprint(True)\n"
-                    + "else:\n"
-                    + "\tprint(False)"
+                rule_label = int(
+                    rule[-1]
                 )
 
-                old_stdout = sys.stdout
-                result = StringIO()
+            except (
+                ValueError,
+                TypeError
+            ):
 
-                try:
+                continue
 
-                    sys.stdout = result
-                    exec(str_rule)
-
-                finally:
-
-                    sys.stdout = old_stdout
-
-                flg_rule = (
-                    result.getvalue()
-                    .replace("\n", "")
-                ) == "True"
-
-            except Exception as exc:
-
-                print(
-                    f"Errore valutando una regola: {exc}"
-                )
-
-                flg_rule = False
+            if rule_label != ATTACK_CLASS:
+                continue
 
             # ------------------------------------------------
-            # ATTACK RULE ATTIVATA
+            # Matching diretto
             # ------------------------------------------------
 
-            if flg_rule:
+            if rule_matches(
+                rule,
+                sample
+            ):
 
                 attack_rule_matches = True
 
@@ -249,7 +354,8 @@ def evaluate_rules_boundary(
                     sample_index
                 ] = True
 
-                # Una sola ATTACK rule è sufficiente.
+                # Una sola ATTACK rule
+                # è sufficiente.
                 break
 
         # ====================================================
@@ -258,33 +364,42 @@ def evaluate_rules_boundary(
 
         if attack_rule_matches:
 
-            # La componente simbolica rileva ATTACK.
-            if y_pred[sample_index] == 0:
-                benign_to_attack_count += 1
+            # La componente simbolica
+            # segnala ATTACK.
 
-            if y_pred[sample_index] != 1:
+            if (
+                ffcn_predictions[sample_index]
+                == 0
+            ):
+
+                benign_to_attack_count += 1
                 rule_override_count += 1
 
-            y_pred[sample_index] = 1
+            y_pred[sample_index] = ATTACK_CLASS
 
         else:
 
-            # Nessuna evidenza simbolica di ATTACK:
-            # manteniamo la predizione della FFCN.
+            # Nessuna ATTACK rule:
+            # manteniamo la FFCN.
+
             y_pred[sample_index] = (
                 ffcn_predictions[sample_index]
             )
 
     # ========================================================
-    # COVERAGE COMPONENTE SIMBOLICA
+    # COVERAGE
     # ========================================================
 
     covered_count = int(
-        np.sum(rule_covered_mask)
+        np.sum(
+            rule_covered_mask
+        )
     )
 
     uncovered_count = int(
-        np.sum(~rule_covered_mask)
+        np.sum(
+            ~rule_covered_mask
+        )
     )
 
     coverage = (
@@ -328,7 +443,7 @@ def evaluate_rules_boundary(
     )
 
     # ========================================================
-    # METRICHE SISTEMA IBRIDO
+    # METRICHE HYBRID
     # ========================================================
 
     (
@@ -350,13 +465,29 @@ def evaluate_rules_boundary(
         0
     )
 
-    (
-        precision,
-        recall,
-        f1
-    ) = Macro_calculate_measures_basic(
+    # --------------------------------------------------------
+    # ATTACK precision / recall / F1
+    # --------------------------------------------------------
+
+    precision = precision_score(
         y_test,
-        y_pred
+        y_pred,
+        pos_label=ATTACK_CLASS,
+        zero_division=0
+    )
+
+    recall = recall_score(
+        y_test,
+        y_pred,
+        pos_label=ATTACK_CLASS,
+        zero_division=0
+    )
+
+    f1 = f1_score(
+        y_test,
+        y_pred,
+        pos_label=ATTACK_CLASS,
+        zero_division=0
     )
 
     print(

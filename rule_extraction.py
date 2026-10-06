@@ -201,7 +201,9 @@ def extract_rules_boundary(
     coupl_coeff,
     pred_vect,
     out_vect,
-    pred
+    pred,
+    features,
+    rule_arr_class= None
 ):
     """
     Estrae le regole CapsRule a partire dai dati prodotti
@@ -226,8 +228,9 @@ def extract_rules_boundary(
 
     Returns
     -------
-    list
-        Regole aggregate per classe.
+    list[list[dict]]
+        Accumulatore delle regole aggregate per classe. Ogni regola
+        mappa gli indici delle feature ai valori osservati nei batch.
     """
 
     global output
@@ -243,12 +246,12 @@ def extract_rules_boundary(
 
     # Coupling coefficients dell'ultimo layer.
     couple_slice = coupl_coeff[-1]
-
+    if rule_arr_class is None:
     # Un insieme di regole per ogni classe.
-    rule_arr_class = [
-        []
-        for _ in range(N_CLASSES)
-    ]
+        rule_arr_class = [
+            []
+            for _ in range(N_CLASSES)
+        ]
 
     # --------------------------------------------------------
     # Estrazione per ogni campione del batch
@@ -377,7 +380,7 @@ def extract_rules_boundary(
                         input_dt[
                             i,
                             feature_index
-                        ]
+                        ].item()
                     )
 
                 else:
@@ -389,7 +392,7 @@ def extract_rules_boundary(
                         input_dt[
                             i,
                             feature_index
-                        ]
+                        ].item()
                     )
 
             # ------------------------------------------------
@@ -418,51 +421,6 @@ def extract_rules_boundary(
                     current_class
                 ].append(rule_dict)
 
-# ========================================================
-    # GENERAZIONE DEL FORMATO FINALE DELLE REGOLE
-    # ========================================================
-
-    rule_list = []
-
-    for class_index in range(N_CLASSES):
-
-        for rule_dict in rule_arr_class[class_index]:
-
-            class_rule = ["("]
-
-            for feature_index in rule_dict:
-
-                class_rule.append(
-                    str(
-                        min(
-                            rule_dict[feature_index]
-                        )
-                    )
-                )
-
-                class_rule.append("<=")
-                class_rule.append(feature_index)
-                class_rule.append("<=")
-
-                class_rule.append(
-                    str(
-                        max(
-                            rule_dict[feature_index]
-                        )
-                    )
-                )
-
-                class_rule.append("and")
-
-            # Rimuove l'ultimo AND.
-            if class_rule[-1] == "and":
-                del class_rule[-1]
-
-            class_rule.append(")")
-
-            # Classe della regola.
-            class_rule.append(class_index)
-
-            rule_list.append(class_rule)
-
-    return rule_list
+    # Restituisce l'accumulatore strutturato. La conversione in
+    # espressioni serializzate avviene una sola volta, dopo tutti i batch.
+    return rule_arr_class

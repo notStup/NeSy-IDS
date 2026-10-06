@@ -1,8 +1,5 @@
 import numpy as np
-from itertools import chain
-from datetime import datetime
-import sys
-from io import StringIO
+
 
 N_CLASSES = 2
 ATTACK_CLASS = 1
@@ -12,39 +9,152 @@ def validate_rules(
     rule_set,
     x_val,
     y_val_one,
-    min_precision=0.85,
-    min_support=3,
-    shap_allowed_features=None
+    min_precision=0.80,
+    min_support=2,
+    shap_importance=None,
+    return_metadata=False
 ):
+    """
+    Valida le ATTACK rules sul validation set.
 
-    # Il modello passa tensori TensorFlow; le regole vengono valutate
-    # come espressioni Python e richiedono valori scalari numerici.
+    Una regola viene mantenuta se:
+
+    - è una ATTACK rule;
+    - copre almeno min_support campioni;
+    - ha precisione almeno min_precision.
+
+    SHAP non viene usato come filtro binario.
+    Viene utilizzato per assegnare un'importanza
+    alle feature contenute nella regola e quindi
+    un'importanza complessiva alla regola.
+
+    Formato regola:
+
+        [
+            "(",
+            min_value,
+            "<=",
+            feature_name,
+            "Feature:",
+            feature_index,
+            "<=",
+            max_value,
+            "and",
+            ...,
+            ")",
+            class_label
+        ]
+    """
+
+    # ========================================================
+    # INPUT
+    # ========================================================
+
     if hasattr(x_val, "numpy"):
         x_val = x_val.numpy()
+
     x_val = np.asarray(x_val)
 
-    # --------------------------------------------------------
-    # Flatten
-    # --------------------------------------------------------
-
-    rules = list(chain.from_iterable(rule_set))
-
-    y_val = np.asarray(y_val_one).astype(int)
+    y_val = np.asarray(
+        y_val_one
+    ).astype(int)
 
     if y_val.ndim == 2:
+
         if y_val.shape[1] == 1:
+
             y_val = y_val[:, 0]
+
         else:
-            y_val = np.argmax(y_val, axis=1)
+
+            y_val = np.argmax(
+                y_val,
+                axis=1
+            )
 
     if y_val.ndim != 1:
+
         raise ValueError(
-            "y_val deve contenere etichette 1D o one-hot 2D"
+            "y_val deve essere 1D oppure one-hot 2D."
         )
 
-    # --------------------------------------------------------
-    # Manteniamo SOLO le regole ATTACK
-    # --------------------------------------------------------
+    # ========================================================
+    # SHAP IMPORTANCE
+    # ========================================================
+
+    if shap_importance is not None:
+
+        shap_importance = np.asarray(
+            shap_importance,
+            dtype=float
+        )
+
+        if shap_importance.ndim != 1:
+
+            raise ValueError(
+                "shap_importance deve essere un array 1D."
+            )
+
+        shap_total = np.sum(
+            shap_importance
+        )
+
+        shap_max = np.max(
+            shap_importance
+        )
+
+    else:
+
+        shap_total = 0.0
+        shap_max = 0.0
+
+    # ========================================================
+    # NORMALIZZAZIONE RULE SET
+    # ========================================================
+
+    rules = []
+
+    def collect_rules(items):
+
+        for item in items:
+
+            if not isinstance(
+                item,
+                (list, tuple)
+            ):
+
+                continue
+
+            # ----------------------------------------------
+            # Regola piatta
+            # ----------------------------------------------
+
+            if (
+                len(item) >= 2
+                and isinstance(
+                    item[-1],
+                    (int, np.integer)
+                )
+                and int(item[-1]) in (0, 1)
+            ):
+
+                rules.append(
+                    list(item)
+                )
+
+            else:
+
+                collect_rules(
+                    item
+                )
+
+    collect_rules(
+        rule_set
+    )
+
+    # ========================================================
+    # SOLO ATTACK RULES
+    # ========================================================
 
     attack_rules = [
         rule
@@ -52,7 +162,9 @@ def validate_rules(
         if int(rule[-1]) == ATTACK_CLASS
     ]
 
-    print("\n=== VALIDAZIONE ATTACK RULES ===")
+    print(
+        "\n=== VALIDAZIONE ATTACK RULES ==="
+    )
 
     print(
         "Regole totali estratte:",
@@ -69,136 +181,281 @@ def validate_rules(
         len(rules) - len(attack_rules)
     )
 
-    
-
-    for i in range(min(3, len(attack_rules))):
-
-        print(f"\nRULE {i+1}:")
-
-        print(attack_rules[i])
-    validated_rules = []
-
-    # --------------------------------------------------------
-    # Valutazione individuale delle regole
-    # --------------------------------------------------------
+    # ========================================================
+    # ESTRAZIONE FEATURE DELLA REGOLA
+    # ========================================================
 
     def extract_rule_features(rule):
-        """
-        Estrae gli indici delle feature utilizzate dalla regola.
 
-        Le feature nella struttura delle regole CapsRule sono
-        rappresentate come interi/numpy interi.
-        L'ultima posizione contiene invece la classe della regola
-        e viene esclusa dal chiamante.
-        """
+        feature_indices = []
 
-        features = []
+        i = 1
 
-        for token in rule[:-1]:
+        while i < len(rule) - 1:
 
-            if isinstance(
-                token,
-                (int, np.integer)
+            if rule[i] == ")":
+                break
+
+            try:
+
+                feature_index = int(
+                    rule[i + 4]
+                )
+
+            except (
+                ValueError,
+                TypeError,
+                IndexError
             ):
 
-                feature_index = int(token)
+                break
 
-                if 0 <= feature_index < 30:
+            # ------------------------------------------------
+            # Ora non c'è più < 30.
+            # Se abbiamo SHAP, usiamo la sua lunghezza.
+            # Altrimenti lasciamo passare l'indice.
+            # ------------------------------------------------
 
-                    features.append(
+            if shap_importance is not None:
+
+                if (
+                    0
+                    <= feature_index
+                    < len(shap_importance)
+                ):
+
+                    feature_indices.append(
                         feature_index
                     )
 
+            else:
+
+                if feature_index >= 0:
+
+                    feature_indices.append(
+                        feature_index
+                    )
+
+            # Una condizione occupa 8 elementi:
+            #
+            # min <= name Feature: index <= max
+            #
+            # e l'elemento successivo può essere "and"
+            # oppure ")".
+
+            i += 8
+
         return sorted(
-            set(features)
+            set(feature_indices)
         )
-    
-    for rule_index, rule in enumerate(attack_rules,start=1 ):
 
-        # ----------------------------------------------------
-        # SHAP FILTER
-        # ----------------------------------------------------
+    # ========================================================
+    # MATCH REGOLA
+    # ========================================================
 
-        if shap_allowed_features is not None:
+    def rule_matches(
+        rule,
+        sample
+    ):
 
-            rule_features = extract_rule_features(
-                rule
-            )
+        i = 1
 
-            # Regola non interpretabile / senza feature
-            if not rule_features:
-                continue
+        while i < len(rule) - 1:
 
-            # La regola viene mantenuta solo se
-            # TUTTE le feature utilizzate sono tra
-            # quelle selezionate da SHAP.
-            if not all(
-                feature in shap_allowed_features
-                for feature in rule_features
+            if rule[i] == ")":
+                break
+
+            try:
+
+                minimum = float(
+                    str(rule[i])
+                    .strip("[]")
+                )
+
+                feature_index = int(
+                    rule[i + 4]
+                )
+
+                maximum = float(
+                    str(rule[i + 6])
+                    .strip("[]")
+                )
+
+                value = float(
+                    np.asarray(
+                        sample[
+                            feature_index
+                        ]
+                    ).reshape(-1)[0]
+                )
+
+            except (
+                ValueError,
+                TypeError,
+                IndexError
             ):
 
-                continue
+                return False
+
+            if not (
+                minimum
+                <= value
+                <= maximum
+            ):
+
+                return False
+
+            i += 8
+
+        return True
+
+    # ========================================================
+    # TOTAL ATTACKS
+    # ========================================================
+
+    total_attacks = np.sum(
+        y_val == ATTACK_CLASS
+    )
+
+    # ========================================================
+    # VALIDAZIONE
+    # ========================================================
+
+    validated_rules = []
+
+    rule_metadata = []
+
+    support_rejected = 0
+    precision_rejected = 0
+
+    for rule_index, rule in enumerate(
+        attack_rules,
+        start=1
+    ):
+
+        # ----------------------------------------------------
+        # FEATURE DELLA REGOLA
+        # ----------------------------------------------------
+
+        rule_features = (
+            extract_rule_features(
+                rule
+            )
+        )
+
+        # ----------------------------------------------------
+        # SHAP RULE IMPORTANCE
+        # ----------------------------------------------------
+
+        shap_strength = 0.0
+        shap_coverage = 0.0
+
+        feature_shap_values = {}
+
+        if (
+            shap_importance is not None
+            and rule_features
+        ):
+
+            valid_features = [
+
+                feature
+
+                for feature in rule_features
+
+                if (
+                    0
+                    <= feature
+                    < len(shap_importance)
+                )
+
+            ]
+
+            if valid_features:
+
+                values = np.asarray(
+
+                    [
+                        shap_importance[
+                            feature
+                        ]
+
+                        for feature
+                        in valid_features
+
+                    ],
+
+                    dtype=float
+
+                )
+
+                # ------------------------------------------
+                # SHAP value per feature
+                # ------------------------------------------
+
+                feature_shap_values = {
+
+                    int(feature):
+                    float(
+                        shap_importance[
+                            feature
+                        ]
+                    )
+
+                    for feature
+                    in valid_features
+
+                }
+
+                # ------------------------------------------
+                # Forza media delle feature della regola
+                #
+                # 0 -> feature poco importante
+                # 1 -> feature più importante
+                # ------------------------------------------
+
+                if shap_max > 0:
+
+                    shap_strength = (
+                        np.mean(values)
+                        / shap_max
+                    )
+
+                # ------------------------------------------
+                # Quota della SHAP importance globale
+                # rappresentata dalle feature della regola.
+                # ------------------------------------------
+
+                if shap_total > 0:
+
+                    shap_coverage = (
+                        np.sum(values)
+                        / shap_total
+                    )
+
+        # ----------------------------------------------------
+        # MATCH VALIDATION
+        # ----------------------------------------------------
 
         covered = 0
         true_attack = 0
         false_attack = 0
 
-        for sample_index, x in enumerate(x_val):
+        for sample_index, sample in enumerate(
+            x_val
+        ):
 
-            rl = list(rule[:-1])
-
-            i = 3
-
-            while i < (len(rl) - 1):
-
-                try:
-
-                    rl[i] = str(
-                        x[int(rl[i])]
-                    )
-
-                    i += 6
-
-                except Exception:
-
-                    break
-
-            str_rule = (
-                "if ("
-                + " ".join(rl)
-                + "):\n"
-                + "\tprint(True)\n"
-                + "else:\n"
-                + "\tprint(False)"
-            )
-
-            try:
-
-                old_stdout = sys.stdout
-
-                result = StringIO()
-
-                sys.stdout = result
-
-                exec(str_rule)
-
-                sys.stdout = old_stdout
-
-                flg_rule = (
-                    result.getvalue()
-                    .replace("\n", "")
-                )
-
-            except Exception:
-
-                sys.stdout = old_stdout
-                continue
-
-            if flg_rule == "True":
+            if rule_matches(
+                rule,
+                sample
+            ):
 
                 covered += 1
 
-                if y_val[sample_index] == ATTACK_CLASS:
+                if (
+                    y_val[sample_index]
+                    == ATTACK_CLASS
+                ):
 
                     true_attack += 1
 
@@ -207,7 +464,7 @@ def validate_rules(
                     false_attack += 1
 
         # ----------------------------------------------------
-        # Metriche della singola ATTACK rule
+        # PRECISION / RECALL
         # ----------------------------------------------------
 
         if covered == 0:
@@ -218,46 +475,148 @@ def validate_rules(
         else:
 
             precision = (
-                true_attack / covered
-            )
-
-            total_attacks = np.sum(
-                y_val == ATTACK_CLASS
+                true_attack
+                / covered
             )
 
             recall = (
-                true_attack / total_attacks
+
+                true_attack
+                / total_attacks
+
                 if total_attacks > 0
+
                 else 0.0
+
             )
 
-        print(
-            f"Rule {rule_index}: "
-            f"covered={covered}, "
-            f"TP={true_attack}, "
-            f"FP={false_attack}, "
-            f"precision={precision:.4f}, "
-            f"recall={recall:.4f}"
+        # ----------------------------------------------------
+        # VALIDAZIONE
+        # ----------------------------------------------------
+
+        if covered < min_support:
+
+            support_rejected += 1
+
+            continue
+
+        if precision < min_precision:
+
+            precision_rejected += 1
+
+            continue
+
+        # ----------------------------------------------------
+        # RULE PRIORITY
+        # ----------------------------------------------------
+        #
+        # Questo NON decide se la regola è valida.
+        #
+        # Serve solamente per quantificare la combinazione
+        # di affidabilità empirica e importanza SHAP.
+        #
+        # 0 -> bassa
+        # 1 -> alta
+        # ----------------------------------------------------
+
+        rule_priority = (
+            precision
+            * shap_strength
         )
 
-        # ----------------------------------------------------
-        # Promozione a Rule Base
-        # ----------------------------------------------------
+        validated_rules.append(
+            rule
+        )
 
-        if (
-            covered >= min_support
-            and precision >= min_precision
-        ):
+        rule_metadata.append({
 
-            validated_rules.append(rule)
+            "rule_index":
+                rule_index,
 
-    # --------------------------------------------------------
-    # Risultato
-    # --------------------------------------------------------
+            "support":
+                int(covered),
+
+            "true_attack":
+                int(true_attack),
+
+            "false_attack":
+                int(false_attack),
+
+            "precision":
+                float(precision),
+
+            "recall":
+                float(recall),
+
+            "features":
+                rule_features,
+
+            "feature_shap_values":
+                feature_shap_values,
+
+            "shap_strength":
+                float(shap_strength),
+
+            "shap_coverage":
+                float(shap_coverage),
+
+            "rule_priority":
+                float(rule_priority)
+
+        })
+
+        print(
+
+            f"Rule {rule_index} VALIDATA: "
+
+            f"support={covered}, "
+
+            f"precision={precision:.4f}, "
+
+            f"recall={recall:.4f}, "
+
+            f"SHAP strength={shap_strength:.4f}, "
+
+            f"SHAP coverage={shap_coverage:.4f}, "
+
+            f"priority={rule_priority:.4f}"
+
+        )
+
+    # ========================================================
+    # ORDINAMENTO METADATA
+    # ========================================================
+
+    rule_metadata.sort(
+
+        key=lambda x:
+            x["rule_priority"],
+
+        reverse=True
+
+    )
+
+    # ========================================================
+    # RISULTATO
+    # ========================================================
 
     print(
         "\nRegole ATTACK validate:",
         len(validated_rules)
     )
+
+    print(
+        "Scartate da supporto:",
+        support_rejected,
+        "| precisione:",
+        precision_rejected
+    )
+
+    if return_metadata:
+
+        return (
+            validated_rules,
+            rule_metadata
+        )
 
     return validated_rules
