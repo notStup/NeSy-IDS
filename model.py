@@ -1,50 +1,19 @@
 import tensorflow as tf
 from tensorflow.keras import layers
-
 from pathlib import Path
-
-from sklearn.metrics import (
-    precision_score,
-    recall_score,
-    f1_score
-)
-
-from preprocessing import (
-    create_split,
-    load_split,
-    save_split
-)
-
-from squash import (
-    squash,
-    safe_norm
-)
-
-from rule_extraction import (
-    extract_rules_boundary
-)
-
-from rule_validation import (
-    validate_rules
-)
-
-from rule_evaluation import (
-    evaluate_rules_boundary
-)
-
-from shap_guidance import (
-    compute_attack_shap_importance,
-    get_top_shap_features,
-    show_shap
-)
-
+from sklearn.metrics import precision_score, recall_score, f1_score
+from preprocessing import create_split, load_split, save_split
+from squash import squash, safe_norm
+from rule_extraction import extract_rules_boundary
+from rule_validation import validate_rules
+from rule_evaluation import evaluate_rules_boundary
+from shap_guidance import compute_attack_shap_importance, get_top_shap_features, show_shap, logic_shap, print_shap_rules
 import numpy as np
 import joblib
 
 
-# ============================================================
+
 # ESPERIMENTO
-# ============================================================
 
 # True:
 #     carica uno split già salvato
@@ -139,11 +108,11 @@ USE_SHAP_RULE_FILTER = True
 # Se True, usa SHAP già salvato.
 # Se False, ricalcola SHAP.
 
-LOAD_SAVED_SHAP = True
+LOAD_SAVED_SHAP = False
 
 SHAP_BACKGROUND_SAMPLES = 100
 
-SHAP_EXPLAIN_SAMPLES = 500
+SHAP_EXPLAIN_SAMPLES = 2000
 
 SHAP_NSAMPLES = 200
 
@@ -163,9 +132,9 @@ SHAP_TOP_K = 35
 LOAD_SAVED_RULES = False
 
 
-MIN_RULE_PRECISION = 0.60
+MIN_RULE_PRECISION = 0.80
 
-MIN_RULE_SUPPORT = 3
+MIN_RULE_SUPPORT = 2
 
 
 # ============================================================
@@ -1756,7 +1725,8 @@ if USE_SHAP_RULE_FILTER:
 
             X_explain,
 
-            feature_names
+            feature_names,
+            shap_dir
 
         )
 
@@ -2120,10 +2090,8 @@ else:
 
     )
 
-
-    # ========================================================
+  
     # VALIDAZIONE REGOLE
-    # ========================================================
 
     print(
         "\n=== VALIDAZIONE REGOLE ==="
@@ -2137,6 +2105,8 @@ else:
         depth=N_CLASSES
 
     ).numpy()
+
+
 
 
     validated_rules, rule_metadata = validate_rules(
@@ -2156,6 +2126,30 @@ else:
         
 
     )
+    
+    
+      # ========================================================
+    # ANALISI SHAP DELLE REGOLE
+    # ========================================================
+    
+    print(
+        "\n=== SHAP ANALYSIS DELLE REGOLE ==="
+    )
+
+    rule_shap_results = logic_shap(
+
+        X_explain,
+
+        shap_values,
+
+        validated_rules,
+
+    )
+    
+    print_shap_rules(validated_rules, rule_shap_results, feature_names)
+
+    
+
 
 
     print(
@@ -2167,9 +2161,7 @@ else:
     )
 
 
-    # ========================================================
     # SALVATAGGIO REGOLE VALIDATE
-    # ========================================================
 
     joblib.dump(
 
@@ -2189,9 +2181,7 @@ else:
     )
 
 
-# ============================================================
 # EVALUATION HYBRID SUL TEST
-# ============================================================
 
 print(
     "\n=== TEST DELLE REGOLE ==="
@@ -2220,9 +2210,7 @@ evaluate_rules_boundary(
 )
 
 
-# ============================================================
 # STAMPA REGOLE
-# ============================================================
 
 for i, rule in enumerate(
 

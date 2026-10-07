@@ -1,0 +1,2134 @@
+[Running] /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/bin/python -u "/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/model.py"
+
+=== DATASET / SPLIT ===
+
+Split caricato da: data/CICIDS-2017/splits/E1_train2000_val5000_test5000_seed42.joblib
+
+Configurazione:
+{'train_samples': 2000, 'val_samples': 5000, 'test_samples': 5000, 'random_state': 42, 'test_fraction': 0.2, 'validation_fraction': 0.1}
+
+X_train: (2000, 78)
+X_val: (5000, 78)
+X_test: (5000, 78)
+
+=== EXPERIMENT SPLIT ===
+X_train: (2000, 78)
+X_val: (5000, 78)
+X_test: (5000, 78)
+Numero feature: 78
+
+Input capsule:
+X_train: (2000, 78, 1)
+X_val: (5000, 78, 1)
+X_test: (5000, 78, 1)
+/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/lib/python3.13/site-packages/keras/src/layers/layer.py:431: UserWarning: `build()` was called on layer 'ffcn', however the layer does not have a `build()` method implemented and it looks like it has unbuilt state. This will cause the layer to be marked as built, despite not being actually built, which may cause failures down the line. Make sure to implement a proper `build()` method.
+  warnings.warn(
+
+Output FFCN: (100, 2, 10)
+
+=== MODELLO ESISTENTE ===
+Caricamento pesi da: Experiments/E1_train2000_val5000_test5000_seed42/model/best_ffcn.weights.h5
+/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/lib/python3.13/site-packages/keras/src/saving/saving_lib.py:869: UserWarning: Skipping variable loading for optimizer 'adam', because it has 2 variables whereas the saved optimizer has 32 variables. 
+  saveable.load_own_variables(store)
+Modello caricato.
+
+=== DIAGNOSTICA FFCN ===
+
+=== FFCN ATTACK METRICS ===
+Precision: 0.7367
+Recall: 0.7898
+F1: 0.7624
+
+=== CARICAMENTO SHAP ===
+
+Top feature SHAP:
+1. Feature 20 (Fwd IAT Total) importance=1.206484
+2. Feature 1 (Flow Duration) importance=1.187182
+3. Feature 23 (Fwd IAT Max) importance=0.947438
+4. Feature 74 (Idle Mean) importance=0.767306
+5. Feature 18 (Flow IAT Max) importance=0.668797
+6. Feature 25 (Bwd IAT Total) importance=0.660688
+7. Feature 76 (Idle Max) importance=0.616425
+8. Feature 17 (Flow IAT Std) importance=0.575326
+9. Feature 77 (Idle Min) importance=0.522581
+10. Feature 22 (Fwd IAT Std) importance=0.405089
+11. Feature 28 (Bwd IAT Max) importance=0.338518
+12. Feature 21 (Fwd IAT Mean) importance=0.323770
+13. Feature 42 (Packet Length Variance) importance=0.264540
+14. Feature 14 (Flow Bytes/s) importance=0.226598
+15. Feature 16 (Flow IAT Mean) importance=0.210899
+16. Feature 27 (Bwd IAT Std) importance=0.201814
+17. Feature 26 (Bwd IAT Mean) importance=0.154770
+18. Feature 36 (Fwd Packets/s) importance=0.138415
+19. Feature 15 (Flow Packets/s) importance=0.135379
+20. Feature 13 (Bwd Packet Length Std) importance=0.115387
+21. Feature 72 (Active Max) importance=0.107130
+22. Feature 73 (Active Min) importance=0.092532
+23. Feature 10 (Bwd Packet Length Max) importance=0.091752
+24. Feature 37 (Bwd Packets/s) importance=0.089894
+25. Feature 66 (Init_Win_bytes_forward) importance=0.077524
+26. Feature 24 (Fwd IAT Min) importance=0.069418
+27. Feature 19 (Flow IAT Min) importance=0.061818
+28. Feature 70 (Active Mean) importance=0.059509
+29. Feature 0 (Destination Port) importance=0.055452
+30. Feature 67 (Init_Win_bytes_backward) importance=0.052740
+31. Feature 65 (Subflow Bwd Bytes) importance=0.050531
+32. Feature 5 (Total Length of Bwd Packets) importance=0.049698
+33. Feature 4 (Total Length of Fwd Packets) importance=0.041255
+34. Feature 40 (Packet Length Mean) importance=0.038019
+35. Feature 6 (Fwd Packet Length Max) importance=0.036762
+
+Feature utilizzabili dalle ATTACK rules: [1, 13, 14, 15, 16, 17, 18, 20, 21, 22, 23, 25, 26, 27, 28, 36, 42, 74, 76, 77]
+
+[SHAP] Beeswarm salvato: /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/Experiments/E1_train2000_val5000_test5000_seed42/shap/shap_beeswarm.png
+[SHAP] Bar plot salvato: /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/Experiments/E1_train2000_val5000_test5000_seed42/shap/shap_barplot.png
+
+=== ESTRAZIONE CAPSRule ===
+Batch di estrazione 1/20 completato
+Batch di estrazione 2/20 completato
+Batch di estrazione 3/20 completato
+Batch di estrazione 4/20 completato
+Batch di estrazione 5/20 completato
+Batch di estrazione 6/20 completato
+Batch di estrazione 7/20 completato
+Batch di estrazione 8/20 completato
+Batch di estrazione 9/20 completato
+Batch di estrazione 10/20 completato
+Batch di estrazione 11/20 completato
+Batch di estrazione 12/20 completato
+Batch di estrazione 13/20 completato
+Batch di estrazione 14/20 completato
+Batch di estrazione 15/20 completato
+Batch di estrazione 16/20 completato
+Batch di estrazione 17/20 completato
+Batch di estrazione 18/20 completato
+Batch di estrazione 19/20 completato
+Batch di estrazione 20/20 completato
+
+Rule set salvato in: Experiments/E1_train2000_val5000_test5000_seed42/rules/rule_set_initial.joblib
+Numero gruppi estratti: 114
+
+=== VALIDAZIONE REGOLE ===
+
+=== VALIDAZIONE ATTACK RULES ===
+Regole totali estratte: 114
+Regole ATTACK: 52
+Regole BENIGN scartate: 62
+Rule 14 VALIDATA: support=345, precision=0.9217, recall=0.3228, SHAP strength=0.2193, SHAP coverage=0.0239, priority=0.2021
+Rule 46 VALIDATA: support=173, precision=0.9653, recall=0.1695, SHAP strength=0.0282, SHAP coverage=0.0031, priority=0.0272
+
+Regole ATTACK validate: 2
+Scartate da supporto: 3 | precisione: 47
+
+Regole validate: 2
+Regole validate salvate in: Experiments/E1_train2000_val5000_test5000_seed42/rules/validated_rules.joblib
+
+=== TEST DELLE REGOLE ===
+
+Regole utilizzate: 2
+
+=== COVERAGE ATTACK RULES ===
+Test samples: 5000
+Rule-covered: 432
+No rule match: 4568
+Coverage: 0.0864
+Rule overrides FFCN: 101
+BENIGN -> ATTACK overrides: 101
+
+=== HYBRID FFCN + ATTACK RULES RESULTS ===
+Precision: 0.7390
+Recall: 0.8680
+F1: 0.7983
+1 ['(', '2129869.5', '<=', 'Packet Length Variance', 'Feature:', 42, '<=', '7826959.5', ')', 1]
+2 ['(', '1934.5', '<=', 'Bwd Packet Length Mean', 'Feature:', 12, '<=', '2901.75', ')', 1]
+
+Regole validate: 2
+
+Evaluation delle regole completata.
+
+[Done] exited with code=0 in 64.823 seconds
+
+[Running] /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/bin/python -u "/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/model.py"
+Traceback (most recent call last):
+  File "/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/model.py", line 10, in <module>
+    from shap_guidance import compute_attack_shap_importance, get_top_shap_features, show_shap, logic_shap, print_shap_results
+ImportError: cannot import name 'print_shap_results' from 'shap_guidance' (/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/shap_guidance.py). Did you mean: 'print_shap_rules'?
+
+[Done] exited with code=1 in 6.729 seconds
+
+[Running] /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/bin/python -u "/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/model.py"
+
+=== DATASET / SPLIT ===
+
+Split caricato da: data/CICIDS-2017/splits/E1_train2000_val5000_test5000_seed42.joblib
+
+Configurazione:
+{'train_samples': 2000, 'val_samples': 5000, 'test_samples': 5000, 'random_state': 42, 'test_fraction': 0.2, 'validation_fraction': 0.1}
+
+X_train: (2000, 78)
+X_val: (5000, 78)
+X_test: (5000, 78)
+
+=== EXPERIMENT SPLIT ===
+X_train: (2000, 78)
+X_val: (5000, 78)
+X_test: (5000, 78)
+Numero feature: 78
+
+Input capsule:
+X_train: (2000, 78, 1)
+X_val: (5000, 78, 1)
+X_test: (5000, 78, 1)
+/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/lib/python3.13/site-packages/keras/src/layers/layer.py:431: UserWarning: `build()` was called on layer 'ffcn', however the layer does not have a `build()` method implemented and it looks like it has unbuilt state. This will cause the layer to be marked as built, despite not being actually built, which may cause failures down the line. Make sure to implement a proper `build()` method.
+  warnings.warn(
+
+Output FFCN: (100, 2, 10)
+
+=== MODELLO ESISTENTE ===
+Caricamento pesi da: Experiments/E1_train2000_val5000_test5000_seed42/model/best_ffcn.weights.h5
+/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/lib/python3.13/site-packages/keras/src/saving/saving_lib.py:869: UserWarning: Skipping variable loading for optimizer 'adam', because it has 2 variables whereas the saved optimizer has 32 variables. 
+  saveable.load_own_variables(store)
+Modello caricato.
+
+=== DIAGNOSTICA FFCN ===
+
+=== FFCN ATTACK METRICS ===
+Precision: 0.7367
+Recall: 0.7898
+F1: 0.7624
+
+=== CARICAMENTO SHAP ===
+
+Top feature SHAP:
+1. Feature 20 (Fwd IAT Total) importance=1.206484
+2. Feature 1 (Flow Duration) importance=1.187182
+3. Feature 23 (Fwd IAT Max) importance=0.947438
+4. Feature 74 (Idle Mean) importance=0.767306
+5. Feature 18 (Flow IAT Max) importance=0.668797
+6. Feature 25 (Bwd IAT Total) importance=0.660688
+7. Feature 76 (Idle Max) importance=0.616425
+8. Feature 17 (Flow IAT Std) importance=0.575326
+9. Feature 77 (Idle Min) importance=0.522581
+10. Feature 22 (Fwd IAT Std) importance=0.405089
+11. Feature 28 (Bwd IAT Max) importance=0.338518
+12. Feature 21 (Fwd IAT Mean) importance=0.323770
+13. Feature 42 (Packet Length Variance) importance=0.264540
+14. Feature 14 (Flow Bytes/s) importance=0.226598
+15. Feature 16 (Flow IAT Mean) importance=0.210899
+16. Feature 27 (Bwd IAT Std) importance=0.201814
+17. Feature 26 (Bwd IAT Mean) importance=0.154770
+18. Feature 36 (Fwd Packets/s) importance=0.138415
+19. Feature 15 (Flow Packets/s) importance=0.135379
+20. Feature 13 (Bwd Packet Length Std) importance=0.115387
+21. Feature 72 (Active Max) importance=0.107130
+22. Feature 73 (Active Min) importance=0.092532
+23. Feature 10 (Bwd Packet Length Max) importance=0.091752
+24. Feature 37 (Bwd Packets/s) importance=0.089894
+25. Feature 66 (Init_Win_bytes_forward) importance=0.077524
+26. Feature 24 (Fwd IAT Min) importance=0.069418
+27. Feature 19 (Flow IAT Min) importance=0.061818
+28. Feature 70 (Active Mean) importance=0.059509
+29. Feature 0 (Destination Port) importance=0.055452
+30. Feature 67 (Init_Win_bytes_backward) importance=0.052740
+31. Feature 65 (Subflow Bwd Bytes) importance=0.050531
+32. Feature 5 (Total Length of Bwd Packets) importance=0.049698
+33. Feature 4 (Total Length of Fwd Packets) importance=0.041255
+34. Feature 40 (Packet Length Mean) importance=0.038019
+35. Feature 6 (Fwd Packet Length Max) importance=0.036762
+
+Feature utilizzabili dalle ATTACK rules: [1, 13, 14, 15, 16, 17, 18, 20, 21, 22, 23, 25, 26, 27, 28, 36, 42, 74, 76, 77]
+Traceback (most recent call last):
+  File "/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/model.py", line 1722, in <module>
+    show_shap(
+    ~~~~~~~~~^
+    
+    
+    ...<6 lines>...
+    
+    
+    )
+    ^
+  File "/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/shap_guidance.py", line 468, in show_shap
+    fig.savefig(
+    ~~~~~~~~~~~^
+        beeswarm_path,
+        ^^^^^^^^^^^^^^
+        dpi=300,
+        ^^^^^^^^
+        bbox_inches="tight"
+        ^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/lib/python3.13/site-packages/matplotlib/figure.py", line 3515, in savefig
+    self.canvas.print_figure(fname, **kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/lib/python3.13/site-packages/matplotlib/backend_bases.py", line 2289, in print_figure
+    result = print_method(
+        filename,
+    ...<3 lines>...
+        bbox_inches_restore=_bbox_inches_restore,
+        **kwargs)
+  File "/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/lib/python3.13/site-packages/matplotlib/backend_bases.py", line 2146, in <lambda>
+    print_method = functools.wraps(meth)(lambda *args, **kwargs: meth(
+                                                                 ~~~~^
+        *args, **{k: v for k, v in kwargs.items() if k not in skip}))
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/lib/python3.13/site-packages/matplotlib/backends/backend_agg.py", line 537, in print_png
+    self._print_pil(filename_or_obj, "png", pil_kwargs, metadata)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/lib/python3.13/site-packages/matplotlib/backends/backend_agg.py", line 486, in _print_pil
+    mpl.image.imsave(
+    ~~~~~~~~~~~~~~~~^
+        filename_or_obj, self.buffer_rgba(), format=fmt, origin="upper",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        dpi=self.figure.dpi, metadata=metadata, pil_kwargs=pil_kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/lib/python3.13/site-packages/matplotlib/image.py", line 1729, in imsave
+    image.save(fname, **pil_kwargs)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/lib/python3.13/site-packages/PIL/Image.py", line 2711, in save
+    save_handler(self, fp, filename)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/lib/python3.13/site-packages/PIL/PngImagePlugin.py", line 1396, in _save
+    fp.write(_MAGIC)
+    ^^^^^^^^
+AttributeError: 'tuple' object has no attribute 'write'
+
+[Done] exited with code=1 in 71.055 seconds
+
+[Running] /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/bin/python -u "/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/model.py"
+
+=== DATASET / SPLIT ===
+
+Split caricato da: data/CICIDS-2017/splits/E1_train2000_val5000_test5000_seed42.joblib
+
+Configurazione:
+{'train_samples': 2000, 'val_samples': 5000, 'test_samples': 5000, 'random_state': 42, 'test_fraction': 0.2, 'validation_fraction': 0.1}
+
+X_train: (2000, 78)
+X_val: (5000, 78)
+X_test: (5000, 78)
+
+=== EXPERIMENT SPLIT ===
+X_train: (2000, 78)
+X_val: (5000, 78)
+X_test: (5000, 78)
+Numero feature: 78
+
+Input capsule:
+X_train: (2000, 78, 1)
+X_val: (5000, 78, 1)
+X_test: (5000, 78, 1)
+/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/lib/python3.13/site-packages/keras/src/layers/layer.py:431: UserWarning: `build()` was called on layer 'ffcn', however the layer does not have a `build()` method implemented and it looks like it has unbuilt state. This will cause the layer to be marked as built, despite not being actually built, which may cause failures down the line. Make sure to implement a proper `build()` method.
+  warnings.warn(
+
+Output FFCN: (100, 2, 10)
+
+=== MODELLO ESISTENTE ===
+Caricamento pesi da: Experiments/E1_train2000_val5000_test5000_seed42/model/best_ffcn.weights.h5
+/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/lib/python3.13/site-packages/keras/src/saving/saving_lib.py:869: UserWarning: Skipping variable loading for optimizer 'adam', because it has 2 variables whereas the saved optimizer has 32 variables. 
+  saveable.load_own_variables(store)
+Modello caricato.
+
+=== DIAGNOSTICA FFCN ===
+
+=== FFCN ATTACK METRICS ===
+Precision: 0.7367
+Recall: 0.7898
+F1: 0.7624
+
+=== CARICAMENTO SHAP ===
+
+Top feature SHAP:
+1. Feature 20 (Fwd IAT Total) importance=1.206484
+2. Feature 1 (Flow Duration) importance=1.187182
+3. Feature 23 (Fwd IAT Max) importance=0.947438
+4. Feature 74 (Idle Mean) importance=0.767306
+5. Feature 18 (Flow IAT Max) importance=0.668797
+6. Feature 25 (Bwd IAT Total) importance=0.660688
+7. Feature 76 (Idle Max) importance=0.616425
+8. Feature 17 (Flow IAT Std) importance=0.575326
+9. Feature 77 (Idle Min) importance=0.522581
+10. Feature 22 (Fwd IAT Std) importance=0.405089
+11. Feature 28 (Bwd IAT Max) importance=0.338518
+12. Feature 21 (Fwd IAT Mean) importance=0.323770
+13. Feature 42 (Packet Length Variance) importance=0.264540
+14. Feature 14 (Flow Bytes/s) importance=0.226598
+15. Feature 16 (Flow IAT Mean) importance=0.210899
+16. Feature 27 (Bwd IAT Std) importance=0.201814
+17. Feature 26 (Bwd IAT Mean) importance=0.154770
+18. Feature 36 (Fwd Packets/s) importance=0.138415
+19. Feature 15 (Flow Packets/s) importance=0.135379
+20. Feature 13 (Bwd Packet Length Std) importance=0.115387
+21. Feature 72 (Active Max) importance=0.107130
+22. Feature 73 (Active Min) importance=0.092532
+23. Feature 10 (Bwd Packet Length Max) importance=0.091752
+24. Feature 37 (Bwd Packets/s) importance=0.089894
+25. Feature 66 (Init_Win_bytes_forward) importance=0.077524
+26. Feature 24 (Fwd IAT Min) importance=0.069418
+27. Feature 19 (Flow IAT Min) importance=0.061818
+28. Feature 70 (Active Mean) importance=0.059509
+29. Feature 0 (Destination Port) importance=0.055452
+30. Feature 67 (Init_Win_bytes_backward) importance=0.052740
+31. Feature 65 (Subflow Bwd Bytes) importance=0.050531
+32. Feature 5 (Total Length of Bwd Packets) importance=0.049698
+33. Feature 4 (Total Length of Fwd Packets) importance=0.041255
+34. Feature 40 (Packet Length Mean) importance=0.038019
+35. Feature 6 (Fwd Packet Length Max) importance=0.036762
+
+Feature utilizzabili dalle ATTACK rules: [1, 13, 14, 15, 16, 17, 18, 20, 21, 22, 23, 25, 26, 27, 28, 36, 42, 74, 76, 77]
+
+[SHAP] Beeswarm salvato: /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/Experiments/E1_train2000_val5000_test5000_seed42/shap/shap_beeswarm.png e /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/Experiments/E1_train2000_val5000_test5000_seed42/shap/shap_beeswarm.pdf
+[SHAP] Bar plot salvato: /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/Experiments/E1_train2000_val5000_test5000_seed42/shap/shap_barplot.png e /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/Experiments/E1_train2000_val5000_test5000_seed42/shap/shap_barplot.pdf
+
+=== ESTRAZIONE CAPSRule ===
+Batch di estrazione 1/20 completato
+Batch di estrazione 2/20 completato
+Batch di estrazione 3/20 completato
+Batch di estrazione 4/20 completato
+Batch di estrazione 5/20 completato
+Batch di estrazione 6/20 completato
+Batch di estrazione 7/20 completato
+Batch di estrazione 8/20 completato
+Batch di estrazione 9/20 completato
+Batch di estrazione 10/20 completato
+Batch di estrazione 11/20 completato
+Batch di estrazione 12/20 completato
+Batch di estrazione 13/20 completato
+Batch di estrazione 14/20 completato
+Batch di estrazione 15/20 completato
+Batch di estrazione 16/20 completato
+Batch di estrazione 17/20 completato
+Batch di estrazione 18/20 completato
+Batch di estrazione 19/20 completato
+Batch di estrazione 20/20 completato
+
+Rule set salvato in: Experiments/E1_train2000_val5000_test5000_seed42/rules/rule_set_initial.joblib
+Numero gruppi estratti: 114
+
+=== VALIDAZIONE REGOLE ===
+
+=== VALIDAZIONE ATTACK RULES ===
+Regole totali estratte: 114
+Regole ATTACK: 52
+Regole BENIGN scartate: 62
+Rule 14 VALIDATA: support=345, precision=0.9217, recall=0.3228, SHAP strength=0.2193, SHAP coverage=0.0239, priority=0.2021
+Rule 46 VALIDATA: support=173, precision=0.9653, recall=0.1695, SHAP strength=0.0282, SHAP coverage=0.0031, priority=0.0272
+
+Regole ATTACK validate: 2
+Scartate da supporto: 3 | precisione: 47
+
+=== SHAP ANALYSIS DELLE REGOLE ===
+
+======================================================================
+RULE 1
+======================================================================
+Feature       : Bwd Packet Length Mean
+Feature index : 12
+Traceback (most recent call last):
+  File "/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/model.py", line 2146, in <module>
+    print_shap_rules(validated_rules, rule_shap_results, feature_names)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/shap_guidance.py", line 582, in print_shap_rules
+    print(f"Range         : [{result['lower']}, {result['upper']}]")
+                              ~~~~~~^^^^^^^^^
+KeyError: 'lower'
+
+[Done] exited with code=1 in 76.853 seconds
+
+[Running] /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/bin/python -u "/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/model.py"
+
+=== DATASET / SPLIT ===
+
+Split caricato da: data/CICIDS-2017/splits/E1_train2000_val5000_test5000_seed42.joblib
+
+Configurazione:
+{'train_samples': 2000, 'val_samples': 5000, 'test_samples': 5000, 'random_state': 42, 'test_fraction': 0.2, 'validation_fraction': 0.1}
+
+X_train: (2000, 78)
+X_val: (5000, 78)
+X_test: (5000, 78)
+
+=== EXPERIMENT SPLIT ===
+X_train: (2000, 78)
+X_val: (5000, 78)
+X_test: (5000, 78)
+Numero feature: 78
+
+Input capsule:
+X_train: (2000, 78, 1)
+X_val: (5000, 78, 1)
+X_test: (5000, 78, 1)
+/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/lib/python3.13/site-packages/keras/src/layers/layer.py:431: UserWarning: `build()` was called on layer 'ffcn', however the layer does not have a `build()` method implemented and it looks like it has unbuilt state. This will cause the layer to be marked as built, despite not being actually built, which may cause failures down the line. Make sure to implement a proper `build()` method.
+  warnings.warn(
+
+Output FFCN: (100, 2, 10)
+
+=== MODELLO ESISTENTE ===
+Caricamento pesi da: Experiments/E1_train2000_val5000_test5000_seed42/model/best_ffcn.weights.h5
+/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/lib/python3.13/site-packages/keras/src/saving/saving_lib.py:869: UserWarning: Skipping variable loading for optimizer 'adam', because it has 2 variables whereas the saved optimizer has 32 variables. 
+  saveable.load_own_variables(store)
+Modello caricato.
+
+=== DIAGNOSTICA FFCN ===
+
+=== FFCN ATTACK METRICS ===
+Precision: 0.7367
+Recall: 0.7898
+F1: 0.7624
+
+=== CARICAMENTO SHAP ===
+
+Top feature SHAP:
+1. Feature 20 (Fwd IAT Total) importance=1.206484
+2. Feature 1 (Flow Duration) importance=1.187182
+3. Feature 23 (Fwd IAT Max) importance=0.947438
+4. Feature 74 (Idle Mean) importance=0.767306
+5. Feature 18 (Flow IAT Max) importance=0.668797
+6. Feature 25 (Bwd IAT Total) importance=0.660688
+7. Feature 76 (Idle Max) importance=0.616425
+8. Feature 17 (Flow IAT Std) importance=0.575326
+9. Feature 77 (Idle Min) importance=0.522581
+10. Feature 22 (Fwd IAT Std) importance=0.405089
+11. Feature 28 (Bwd IAT Max) importance=0.338518
+12. Feature 21 (Fwd IAT Mean) importance=0.323770
+13. Feature 42 (Packet Length Variance) importance=0.264540
+14. Feature 14 (Flow Bytes/s) importance=0.226598
+15. Feature 16 (Flow IAT Mean) importance=0.210899
+16. Feature 27 (Bwd IAT Std) importance=0.201814
+17. Feature 26 (Bwd IAT Mean) importance=0.154770
+18. Feature 36 (Fwd Packets/s) importance=0.138415
+19. Feature 15 (Flow Packets/s) importance=0.135379
+20. Feature 13 (Bwd Packet Length Std) importance=0.115387
+21. Feature 72 (Active Max) importance=0.107130
+22. Feature 73 (Active Min) importance=0.092532
+23. Feature 10 (Bwd Packet Length Max) importance=0.091752
+24. Feature 37 (Bwd Packets/s) importance=0.089894
+25. Feature 66 (Init_Win_bytes_forward) importance=0.077524
+26. Feature 24 (Fwd IAT Min) importance=0.069418
+27. Feature 19 (Flow IAT Min) importance=0.061818
+28. Feature 70 (Active Mean) importance=0.059509
+29. Feature 0 (Destination Port) importance=0.055452
+30. Feature 67 (Init_Win_bytes_backward) importance=0.052740
+31. Feature 65 (Subflow Bwd Bytes) importance=0.050531
+32. Feature 5 (Total Length of Bwd Packets) importance=0.049698
+33. Feature 4 (Total Length of Fwd Packets) importance=0.041255
+34. Feature 40 (Packet Length Mean) importance=0.038019
+35. Feature 6 (Fwd Packet Length Max) importance=0.036762
+
+Feature utilizzabili dalle ATTACK rules: [1, 13, 14, 15, 16, 17, 18, 20, 21, 22, 23, 25, 26, 27, 28, 36, 42, 74, 76, 77]
+
+[SHAP] Beeswarm salvato: /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/Experiments/E1_train2000_val5000_test5000_seed42/shap/shap_beeswarm.png e /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/Experiments/E1_train2000_val5000_test5000_seed42/shap/shap_beeswarm.pdf
+[SHAP] Bar plot salvato: /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/Experiments/E1_train2000_val5000_test5000_seed42/shap/shap_barplot.png e /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/Experiments/E1_train2000_val5000_test5000_seed42/shap/shap_barplot.pdf
+
+=== ESTRAZIONE CAPSRule ===
+Batch di estrazione 1/20 completato
+Batch di estrazione 2/20 completato
+Batch di estrazione 3/20 completato
+Batch di estrazione 4/20 completato
+Batch di estrazione 5/20 completato
+Batch di estrazione 6/20 completato
+Batch di estrazione 7/20 completato
+Batch di estrazione 8/20 completato
+Batch di estrazione 9/20 completato
+Batch di estrazione 10/20 completato
+Batch di estrazione 11/20 completato
+Batch di estrazione 12/20 completato
+Batch di estrazione 13/20 completato
+Batch di estrazione 14/20 completato
+Batch di estrazione 15/20 completato
+Batch di estrazione 16/20 completato
+Batch di estrazione 17/20 completato
+Batch di estrazione 18/20 completato
+Batch di estrazione 19/20 completato
+Batch di estrazione 20/20 completato
+
+Rule set salvato in: Experiments/E1_train2000_val5000_test5000_seed42/rules/rule_set_initial.joblib
+Numero gruppi estratti: 114
+
+=== VALIDAZIONE REGOLE ===
+
+=== VALIDAZIONE ATTACK RULES ===
+Regole totali estratte: 114
+Regole ATTACK: 52
+Regole BENIGN scartate: 62
+Rule 14 VALIDATA: support=345, precision=0.9217, recall=0.3228, SHAP strength=0.2193, SHAP coverage=0.0239, priority=0.2021
+Rule 46 VALIDATA: support=173, precision=0.9653, recall=0.1695, SHAP strength=0.0282, SHAP coverage=0.0031, priority=0.0272
+
+Regole ATTACK validate: 2
+Scartate da supporto: 3 | precisione: 47
+
+=== SHAP ANALYSIS DELLE REGOLE ===
+
+======================================================================
+RULE 1
+======================================================================
+Feature       : Packet Length Variance
+Feature index : 42
+Range         : [2129869.5, 7826959.5]
+Class         : 1
+Samples       : 133
+Mean SHAP     : +0.121676
+Mean |SHAP|   : 0.462790
+Positive ratio: 54.14%
+
+======================================================================
+RULE 2
+======================================================================
+Feature       : Bwd Packet Length Mean
+Feature index : 12
+Range         : [1934.5, 2901.75]
+Class         : 1
+Samples       : 64
+Mean SHAP     : -0.026219
+Mean |SHAP|   : 0.042687
+Positive ratio: 50.00%
+
+Regole validate: 2
+Regole validate salvate in: Experiments/E1_train2000_val5000_test5000_seed42/rules/validated_rules.joblib
+
+=== TEST DELLE REGOLE ===
+
+Regole utilizzate: 2
+
+=== COVERAGE ATTACK RULES ===
+Test samples: 5000
+Rule-covered: 432
+No rule match: 4568
+Coverage: 0.0864
+Rule overrides FFCN: 101
+BENIGN -> ATTACK overrides: 101
+
+=== HYBRID FFCN + ATTACK RULES RESULTS ===
+Precision: 0.7390
+Recall: 0.8680
+F1: 0.7983
+1 ['(', '2129869.5', '<=', 'Packet Length Variance', 'Feature:', 42, '<=', '7826959.5', ')', 1]
+2 ['(', '1934.5', '<=', 'Bwd Packet Length Mean', 'Feature:', 12, '<=', '2901.75', ')', 1]
+
+Regole validate: 2
+
+Evaluation delle regole completata.
+
+[Done] exited with code=0 in 69.563 seconds
+
+[Running] /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/bin/python -u "/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/model.py"
+
+=== DATASET / SPLIT ===
+
+Split caricato da: data/CICIDS-2017/splits/E1_train2000_val5000_test5000_seed42.joblib
+
+Configurazione:
+{'train_samples': 2000, 'val_samples': 5000, 'test_samples': 5000, 'random_state': 42, 'test_fraction': 0.2, 'validation_fraction': 0.1}
+
+X_train: (2000, 78)
+X_val: (5000, 78)
+X_test: (5000, 78)
+
+=== EXPERIMENT SPLIT ===
+X_train: (2000, 78)
+X_val: (5000, 78)
+X_test: (5000, 78)
+Numero feature: 78
+
+Input capsule:
+X_train: (2000, 78, 1)
+X_val: (5000, 78, 1)
+X_test: (5000, 78, 1)
+/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/lib/python3.13/site-packages/keras/src/layers/layer.py:431: UserWarning: `build()` was called on layer 'ffcn', however the layer does not have a `build()` method implemented and it looks like it has unbuilt state. This will cause the layer to be marked as built, despite not being actually built, which may cause failures down the line. Make sure to implement a proper `build()` method.
+  warnings.warn(
+
+Output FFCN: (100, 2, 10)
+
+=== MODELLO ESISTENTE ===
+Caricamento pesi da: Experiments/E1_train2000_val5000_test5000_seed42/model/best_ffcn.weights.h5
+/Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/.venv/lib/python3.13/site-packages/keras/src/saving/saving_lib.py:869: UserWarning: Skipping variable loading for optimizer 'adam', because it has 2 variables whereas the saved optimizer has 32 variables. 
+  saveable.load_own_variables(store)
+Modello caricato.
+
+=== DIAGNOSTICA FFCN ===
+
+=== FFCN ATTACK METRICS ===
+Precision: 0.7367
+Recall: 0.7898
+F1: 0.7624
+
+=== CARICAMENTO SHAP ===
+
+Top feature SHAP:
+1. Feature 20 (Fwd IAT Total) importance=1.206484
+2. Feature 1 (Flow Duration) importance=1.187182
+3. Feature 23 (Fwd IAT Max) importance=0.947438
+4. Feature 74 (Idle Mean) importance=0.767306
+5. Feature 18 (Flow IAT Max) importance=0.668797
+6. Feature 25 (Bwd IAT Total) importance=0.660688
+7. Feature 76 (Idle Max) importance=0.616425
+8. Feature 17 (Flow IAT Std) importance=0.575326
+9. Feature 77 (Idle Min) importance=0.522581
+10. Feature 22 (Fwd IAT Std) importance=0.405089
+11. Feature 28 (Bwd IAT Max) importance=0.338518
+12. Feature 21 (Fwd IAT Mean) importance=0.323770
+13. Feature 42 (Packet Length Variance) importance=0.264540
+14. Feature 14 (Flow Bytes/s) importance=0.226598
+15. Feature 16 (Flow IAT Mean) importance=0.210899
+16. Feature 27 (Bwd IAT Std) importance=0.201814
+17. Feature 26 (Bwd IAT Mean) importance=0.154770
+18. Feature 36 (Fwd Packets/s) importance=0.138415
+19. Feature 15 (Flow Packets/s) importance=0.135379
+20. Feature 13 (Bwd Packet Length Std) importance=0.115387
+21. Feature 72 (Active Max) importance=0.107130
+22. Feature 73 (Active Min) importance=0.092532
+23. Feature 10 (Bwd Packet Length Max) importance=0.091752
+24. Feature 37 (Bwd Packets/s) importance=0.089894
+25. Feature 66 (Init_Win_bytes_forward) importance=0.077524
+26. Feature 24 (Fwd IAT Min) importance=0.069418
+27. Feature 19 (Flow IAT Min) importance=0.061818
+28. Feature 70 (Active Mean) importance=0.059509
+29. Feature 0 (Destination Port) importance=0.055452
+30. Feature 67 (Init_Win_bytes_backward) importance=0.052740
+31. Feature 65 (Subflow Bwd Bytes) importance=0.050531
+32. Feature 5 (Total Length of Bwd Packets) importance=0.049698
+33. Feature 4 (Total Length of Fwd Packets) importance=0.041255
+34. Feature 40 (Packet Length Mean) importance=0.038019
+35. Feature 6 (Fwd Packet Length Max) importance=0.036762
+
+Feature utilizzabili dalle ATTACK rules: [1, 13, 14, 15, 16, 17, 18, 20, 21, 22, 23, 25, 26, 27, 28, 36, 42, 74, 76, 77]
+
+[SHAP] Beeswarm salvato: /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/Experiments/E1_train2000_val5000_test5000_seed42/shap/shap_beeswarm.png e /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/Experiments/E1_train2000_val5000_test5000_seed42/shap/shap_beeswarm.pdf
+[SHAP] Bar plot salvato: /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/Experiments/E1_train2000_val5000_test5000_seed42/shap/shap_barplot.png e /Users/stup/Documents/Unipa/INGEGNERIA_INFORMATICA_LM/TESI/Coding/Nesy-IDS/Experiments/E1_train2000_val5000_test5000_seed42/shap/shap_barplot.pdf
+
+=== ESTRAZIONE CAPSRule ===
+Batch di estrazione 1/20 completato
+Batch di estrazione 2/20 completato
+Batch di estrazione 3/20 completato
+Batch di estrazione 4/20 completato
+Batch di estrazione 5/20 completato
+Batch di estrazione 6/20 completato
+Batch di estrazione 7/20 completato
+Batch di estrazione 8/20 completato
+Batch di estrazione 9/20 completato
+Batch di estrazione 10/20 completato
+Batch di estrazione 11/20 completato
+Batch di estrazione 12/20 completato
+Batch di estrazione 13/20 completato
+Batch di estrazione 14/20 completato
+Batch di estrazione 15/20 completato
+Batch di estrazione 16/20 completato
+Batch di estrazione 17/20 completato
+Batch di estrazione 18/20 completato
+Batch di estrazione 19/20 completato
+Batch di estrazione 20/20 completato
+
+Rule set salvato in: Experiments/E1_train2000_val5000_test5000_seed42/rules/rule_set_initial.joblib
+Numero gruppi estratti: 114
+
+=== SHAP ANALYSIS DELLE REGOLE ===
+
+======================================================================
+RULE 1
+======================================================================
+Feature       : Bwd IAT Min
+Feature index : 29
+Range         : [0.0, 1639.0]
+Class         : 0
+Samples       : 389
+Mean SHAP     : +0.002612
+Mean |SHAP|   : 0.018444
+Positive ratio: 57.58%
+
+======================================================================
+RULE 2
+======================================================================
+Feature       : Fwd Header Length
+Feature index : 34
+Range         : [20.0, 1900.0]
+Class         : 0
+Samples       : 393
+Mean SHAP     : -0.000603
+Mean |SHAP|   : 0.003648
+Positive ratio: 46.82%
+
+======================================================================
+RULE 3
+======================================================================
+Feature       : Flow Packets/s
+Feature index : 15
+Range         : [1.8911714553833008, 135135.140625]
+Class         : 0
+Samples       : 195
+Mean SHAP     : -0.017648
+Mean |SHAP|   : 0.165937
+Positive ratio: 42.05%
+
+======================================================================
+RULE 4
+======================================================================
+Feature       : Fwd IAT Total
+Feature index : 20
+Range         : [4.0, 79100000.0]
+Class         : 0
+Samples       : 139
+Mean SHAP     : -0.025076
+Mean |SHAP|   : 1.426232
+Positive ratio: 54.68%
+
+======================================================================
+RULE 5
+======================================================================
+Feature       : Active Mean
+Feature index : 70
+Range         : [41312.0, 41312.0]
+Class         : 0
+Samples       : 0
+Mean SHAP     : +0.000000
+Mean |SHAP|   : 0.000000
+Positive ratio: 0.00%
+
+======================================================================
+RULE 6
+======================================================================
+Feature       : Max Packet Length
+Feature index : 39
+Range         : [6.0, 5840.0]
+Class         : 0
+Samples       : 291
+Mean SHAP     : +0.004647
+Mean |SHAP|   : 0.031378
+Positive ratio: 50.52%
+
+======================================================================
+RULE 7
+======================================================================
+Feature       : Init_Win_bytes_forward
+Feature index : 66
+Range         : [-1.0, 65535.0]
+Class         : 0
+Samples       : 394
+Mean SHAP     : +0.004136
+Mean |SHAP|   : 0.077524
+Positive ratio: 52.54%
+
+======================================================================
+RULE 8
+======================================================================
+Feature       : Packet Length Mean
+Feature index : 40
+Range         : [2.5714285373687744, 1669.857177734375]
+Class         : 0
+Samples       : 274
+Mean SHAP     : -0.015146
+Mean |SHAP|   : 0.040324
+Positive ratio: 50.73%
+
+======================================================================
+RULE 9
+======================================================================
+Feature       : Fwd Packet Length Mean
+Feature index : 8
+Range         : [6.0, 1657.2857666015625]
+Class         : 0
+Samples       : 233
+Mean SHAP     : +0.001522
+Mean |SHAP|   : 0.009098
+Positive ratio: 50.64%
+
+======================================================================
+RULE 10
+======================================================================
+Feature       : Total Length of Bwd Packets
+Feature index : 5
+Range         : [6.0, 640.0]
+Class         : 0
+Samples       : 120
+Mean SHAP     : +0.016385
+Mean |SHAP|   : 0.031367
+Positive ratio: 49.17%
+
+======================================================================
+RULE 11
+======================================================================
+Feature       : Flow IAT Std
+Feature index : 17
+Range         : [34.03307342529297, 5632926.5]
+Class         : 0
+Samples       : 108
+Mean SHAP     : +0.960901
+Mean |SHAP|   : 1.339468
+Positive ratio: 49.07%
+
+======================================================================
+RULE 12
+======================================================================
+Feature       : Init_Win_bytes_backward
+Feature index : 67
+Range         : [-1.0, 62969.0]
+Class         : 0
+Samples       : 394
+Mean SHAP     : +0.003952
+Mean |SHAP|   : 0.052740
+Positive ratio: 53.30%
+
+======================================================================
+RULE 13
+======================================================================
+Feature       : Destination Port
+Feature index : 0
+Range         : [22.0, 56340.0]
+Class         : 0
+Samples       : 382
+Mean SHAP     : -0.019405
+Mean |SHAP|   : 0.051335
+Positive ratio: 54.71%
+
+======================================================================
+RULE 14
+======================================================================
+Feature       : Flow IAT Min
+Feature index : 19
+Range         : [1.0, 2931531.0]
+Class         : 0
+Samples       : 370
+Mean SHAP     : -0.014507
+Mean |SHAP|   : 0.063635
+Positive ratio: 52.70%
+
+======================================================================
+RULE 15
+======================================================================
+Feature       : Fwd IAT Mean
+Feature index : 21
+Range         : [130.0, 19300000.0]
+Class         : 0
+Samples       : 215
+Mean SHAP     : -0.055604
+Mean |SHAP|   : 0.369743
+Positive ratio: 50.23%
+
+======================================================================
+RULE 16
+======================================================================
+Feature       : Down/Up Ratio
+Feature index : 51
+Range         : [1.0, 2.0]
+Class         : 0
+Samples       : 214
+Mean SHAP     : -0.002538
+Mean |SHAP|   : 0.004476
+Positive ratio: 48.60%
+
+======================================================================
+RULE 17
+======================================================================
+Feature       : Packet Length Std
+Feature index : 41
+Range         : [3.2863352298736572, 818.8661499023438]
+Class         : 0
+Samples       : 89
+Mean SHAP     : -0.000659
+Mean |SHAP|   : 0.017403
+Positive ratio: 49.44%
+
+======================================================================
+RULE 18
+======================================================================
+Feature       : Subflow Fwd Bytes
+Feature index : 63
+Range         : [12.0, 84012.0]
+Class         : 0
+Samples       : 232
+Mean SHAP     : -0.003273
+Mean |SHAP|   : 0.013478
+Positive ratio: 53.02%
+
+======================================================================
+RULE 19
+======================================================================
+Feature       : Flow Bytes/s
+Feature index : 14
+Range         : [7.394744873046875, 4000000.0]
+Class         : 0
+Samples       : 319
+Mean SHAP     : +0.014674
+Mean |SHAP|   : 0.200290
+Positive ratio: 56.43%
+
+======================================================================
+RULE 20
+======================================================================
+Feature       : Total Fwd Packets
+Feature index : 2
+Range         : [1.0, 3.0]
+Class         : 0
+Samples       : 210
+Mean SHAP     : +0.000345
+Mean |SHAP|   : 0.003761
+Positive ratio: 56.19%
+
+======================================================================
+RULE 21
+======================================================================
+Feature       : Avg Fwd Segment Size
+Feature index : 53
+Range         : [6.0, 1373.5384521484375]
+Class         : 0
+Samples       : 233
+Mean SHAP     : -0.004276
+Mean |SHAP|   : 0.013683
+Positive ratio: 49.79%
+
+======================================================================
+RULE 22
+======================================================================
+Feature       : Fwd Header Length.1
+Feature index : 55
+Range         : [20.0, 5172.0]
+Class         : 0
+Samples       : 393
+Mean SHAP     : +0.000244
+Mean |SHAP|   : 0.003632
+Positive ratio: 56.74%
+
+======================================================================
+RULE 23
+======================================================================
+Feature       : Fwd IAT Std
+Feature index : 22
+Range         : [33.941123962402344, 38700000.0]
+Class         : 0
+Samples       : 180
+Mean SHAP     : -0.054625
+Mean |SHAP|   : 0.467360
+Positive ratio: 54.44%
+
+======================================================================
+RULE 24
+======================================================================
+Feature       : Fwd Packet Length Min
+Feature index : 7
+Range         : [6.0, 216.0]
+Class         : 0
+Samples       : 44
+Mean SHAP     : -0.002443
+Mean |SHAP|   : 0.011746
+Positive ratio: 61.36%
+
+======================================================================
+RULE 25
+======================================================================
+Feature       : Total Length of Fwd Packets
+Feature index : 4
+Range         : [4.0, 2986.0]
+Class         : 0
+Samples       : 235
+Mean SHAP     : +0.005342
+Mean |SHAP|   : 0.023827
+Positive ratio: 56.60%
+
+======================================================================
+RULE 26
+======================================================================
+Feature       : Min Packet Length
+Feature index : 38
+Range         : [6.0, 79.0]
+Class         : 0
+Samples       : 37
+Mean SHAP     : -0.021796
+Mean |SHAP|   : 0.034582
+Positive ratio: 54.05%
+
+======================================================================
+RULE 27
+======================================================================
+Feature       : Flow Duration
+Feature index : 1
+Range         : [3.0, 60555504.0]
+Class         : 0
+Samples       : 253
+Mean SHAP     : -0.371748
+Mean |SHAP|   : 1.449582
+Positive ratio: 55.34%
+
+======================================================================
+RULE 28
+======================================================================
+Feature       : Fwd Packet Length Max
+Feature index : 6
+Range         : [6.0, 617.0]
+Class         : 0
+Samples       : 234
+Mean SHAP     : -0.008414
+Mean |SHAP|   : 0.021317
+Positive ratio: 41.03%
+
+======================================================================
+RULE 29
+======================================================================
+Feature       : Subflow Bwd Packets
+Feature index : 64
+Range         : [1.0, 6.0]
+Class         : 0
+Samples       : 266
+Mean SHAP     : -0.000584
+Mean |SHAP|   : 0.009480
+Positive ratio: 47.74%
+
+======================================================================
+RULE 30
+======================================================================
+Feature       : Fwd IAT Min
+Feature index : 24
+Range         : [1.0, 82565.0]
+Class         : 0
+Samples       : 250
+Mean SHAP     : -0.017100
+Mean |SHAP|   : 0.054339
+Positive ratio: 54.40%
+
+======================================================================
+RULE 31
+======================================================================
+Feature       : Flow IAT Max
+Feature index : 18
+Range         : [15.0, 58906068.0]
+Class         : 0
+Samples       : 238
+Mean SHAP     : +0.202307
+Mean |SHAP|   : 0.609840
+Positive ratio: 50.84%
+
+======================================================================
+RULE 32
+======================================================================
+Feature       : URG Flag Count
+Feature index : 48
+Range         : [1.0, 1.0]
+Class         : 0
+Samples       : 5
+Mean SHAP     : -0.008286
+Mean |SHAP|   : 0.011695
+Positive ratio: 20.00%
+
+======================================================================
+RULE 33
+======================================================================
+Feature       : ACK Flag Count
+Feature index : 47
+Range         : [1.0, 1.0]
+Class         : 0
+Samples       : 169
+Mean SHAP     : -0.000547
+Mean |SHAP|   : 0.001704
+Positive ratio: 46.75%
+
+======================================================================
+RULE 34
+======================================================================
+Feature       : Idle Std
+Feature index : 75
+Range         : [35197.65234375, 42200000.0]
+Class         : 0
+Samples       : 2
+Mean SHAP     : +0.080516
+Mean |SHAP|   : 0.080516
+Positive ratio: 100.00%
+
+======================================================================
+RULE 35
+======================================================================
+Feature       : Fwd IAT Max
+Feature index : 23
+Range         : [43.0, 16000000.0]
+Class         : 0
+Samples       : 121
+Mean SHAP     : +0.076665
+Mean |SHAP|   : 1.248778
+Positive ratio: 52.07%
+
+======================================================================
+RULE 36
+======================================================================
+Feature       : Bwd Packet Length Min
+Feature index : 11
+Range         : [6.0, 172.0]
+Class         : 0
+Samples       : 116
+Mean SHAP     : -0.006975
+Mean |SHAP|   : 0.027392
+Positive ratio: 40.52%
+
+======================================================================
+RULE 37
+======================================================================
+Feature       : Total Backward Packets
+Feature index : 3
+Range         : [15.0, 20.0]
+Class         : 0
+Samples       : 3
+Mean SHAP     : -0.002981
+Mean |SHAP|   : 0.057777
+Positive ratio: 66.67%
+
+======================================================================
+RULE 38
+======================================================================
+Feature       : Bwd Packet Length Max
+Feature index : 10
+Range         : [6.0, 5840.0]
+Class         : 0
+Samples       : 239
+Mean SHAP     : -0.001608
+Mean |SHAP|   : 0.029510
+Positive ratio: 51.88%
+
+======================================================================
+RULE 39
+======================================================================
+Feature       : Bwd IAT Total
+Feature index : 25
+Range         : [3.0, 52100000.0]
+Class         : 0
+Samples       : 151
+Mean SHAP     : +0.101245
+Mean |SHAP|   : 0.594763
+Positive ratio: 49.67%
+
+======================================================================
+RULE 40
+======================================================================
+Feature       : Subflow Fwd Packets
+Feature index : 62
+Range         : [1.0, 2.0]
+Class         : 0
+Samples       : 161
+Mean SHAP     : +0.011371
+Mean |SHAP|   : 0.015606
+Positive ratio: 66.46%
+
+======================================================================
+RULE 41
+======================================================================
+Feature       : Idle Min
+Feature index : 77
+Range         : [5323109.0, 98900000.0]
+Class         : 0
+Samples       : 125
+Mean SHAP     : +0.279139
+Mean |SHAP|   : 0.773644
+Positive ratio: 48.00%
+
+======================================================================
+RULE 42
+======================================================================
+Feature       : Flow IAT Mean
+Feature index : 16
+Range         : [104.5, 6206349.0]
+Class         : 0
+Samples       : 139
+Mean SHAP     : +0.020864
+Mean |SHAP|   : 0.216883
+Positive ratio: 53.24%
+
+======================================================================
+RULE 43
+======================================================================
+Feature       : Avg Bwd Segment Size
+Feature index : 54
+Range         : [6.0, 1657.2857666015625]
+Class         : 0
+Samples       : 166
+Mean SHAP     : +0.008673
+Mean |SHAP|   : 0.014462
+Positive ratio: 58.43%
+
+======================================================================
+RULE 44
+======================================================================
+Feature       : Bwd Packet Length Std
+Feature index : 13
+Range         : [457.94671630859375, 669.4241943359375]
+Class         : 0
+Samples       : 0
+Mean SHAP     : +0.000000
+Mean |SHAP|   : 0.000000
+Positive ratio: 0.00%
+
+======================================================================
+RULE 45
+======================================================================
+Feature       : min_seg_size_forward
+Feature index : 69
+Range         : [20.0, 40.0]
+Class         : 0
+Samples       : 394
+Mean SHAP     : +0.000364
+Mean |SHAP|   : 0.002083
+Positive ratio: 47.46%
+
+======================================================================
+RULE 46
+======================================================================
+Feature       : Bwd Packets/s
+Feature index : 37
+Range         : [6.776812553405762, 27027.02734375]
+Class         : 0
+Samples       : 134
+Mean SHAP     : -0.000268
+Mean |SHAP|   : 0.183991
+Positive ratio: 56.72%
+
+======================================================================
+RULE 47
+======================================================================
+Feature       : Bwd Packet Length Mean
+Feature index : 12
+Range         : [6.0, 1249.4666748046875]
+Class         : 0
+Samples       : 124
+Mean SHAP     : -0.004708
+Mean |SHAP|   : 0.031247
+Positive ratio: 25.81%
+
+======================================================================
+RULE 48
+======================================================================
+Feature       : Subflow Bwd Bytes
+Feature index : 65
+Range         : [30.0, 617535.0]
+Class         : 0
+Samples       : 182
+Mean SHAP     : -0.000478
+Mean |SHAP|   : 0.023665
+Positive ratio: 50.00%
+
+======================================================================
+RULE 49
+======================================================================
+Feature       : Fwd Packets/s
+Feature index : 36
+Range         : [2.3533380031585693, 10752.6884765625]
+Class         : 0
+Samples       : 68
+Mean SHAP     : +0.010705
+Mean |SHAP|   : 0.049108
+Positive ratio: 52.94%
+
+======================================================================
+RULE 50
+======================================================================
+Feature       : Bwd Header Length
+Feature index : 35
+Range         : [20.0, 1096.0]
+Class         : 0
+Samples       : 313
+Mean SHAP     : -0.008216
+Mean |SHAP|   : 0.017181
+Positive ratio: 37.70%
+
+======================================================================
+RULE 51
+======================================================================
+Feature       : Packet Length Variance
+Feature index : 42
+Range         : [267.3333435058594, 5083184.0]
+Class         : 0
+Samples       : 134
+Mean SHAP     : +0.141362
+Mean |SHAP|   : 0.447244
+Positive ratio: 53.73%
+
+======================================================================
+RULE 52
+======================================================================
+Feature       : Active Min
+Feature index : 73
+Range         : [22817.0, 218293.0]
+Class         : 0
+Samples       : 0
+Mean SHAP     : +0.000000
+Mean |SHAP|   : 0.000000
+Positive ratio: 0.00%
+
+======================================================================
+RULE 53
+======================================================================
+Feature       : Bwd IAT Max
+Feature index : 28
+Range         : [50108.0, 9999654.0]
+Class         : 0
+Samples       : 108
+Mean SHAP     : -0.074715
+Mean |SHAP|   : 0.411601
+Positive ratio: 52.78%
+
+======================================================================
+RULE 54
+======================================================================
+Feature       : Average Packet Size
+Feature index : 52
+Range         : [9.0, 916.4615478515625]
+Class         : 0
+Samples       : 75
+Mean SHAP     : -0.000583
+Mean |SHAP|   : 0.005921
+Positive ratio: 61.33%
+
+======================================================================
+RULE 55
+======================================================================
+Feature       : act_data_pkt_fwd
+Feature index : 68
+Range         : [1.0, 11.0]
+Class         : 0
+Samples       : 228
+Mean SHAP     : -0.004837
+Mean |SHAP|   : 0.011715
+Positive ratio: 46.93%
+
+======================================================================
+RULE 56
+======================================================================
+Feature       : Fwd Packet Length Std
+Feature index : 9
+Range         : [10.263202667236328, 191.10293579101562]
+Class         : 0
+Samples       : 157
+Mean SHAP     : +0.007259
+Mean |SHAP|   : 0.017948
+Positive ratio: 60.51%
+
+======================================================================
+RULE 57
+======================================================================
+Feature       : Bwd IAT Std
+Feature index : 27
+Range         : [9365.8046875, 38700000.0]
+Class         : 0
+Samples       : 140
+Mean SHAP     : -0.261332
+Mean |SHAP|   : 0.379905
+Positive ratio: 50.71%
+
+======================================================================
+RULE 58
+======================================================================
+Feature       : Bwd IAT Mean
+Feature index : 26
+Range         : [8098.16650390625, 19600000.0]
+Class         : 0
+Samples       : 156
+Mean SHAP     : -0.060854
+Mean |SHAP|   : 0.259296
+Positive ratio: 46.79%
+
+======================================================================
+RULE 59
+======================================================================
+Feature       : Idle Mean
+Feature index : 74
+Range         : [10016279.0, 45400000.0]
+Class         : 0
+Samples       : 7
+Mean SHAP     : +0.003816
+Mean |SHAP|   : 0.076519
+Positive ratio: 42.86%
+
+======================================================================
+RULE 60
+======================================================================
+Feature       : Active Std
+Feature index : 71
+Range         : [165390.234375, 165390.234375]
+Class         : 0
+Samples       : 0
+Mean SHAP     : +0.000000
+Mean |SHAP|   : 0.000000
+Positive ratio: 0.00%
+
+======================================================================
+RULE 61
+======================================================================
+Feature       : Idle Max
+Feature index : 76
+Range         : [58016920.0, 58300000.0]
+Class         : 0
+Samples       : 0
+Mean SHAP     : +0.000000
+Mean |SHAP|   : 0.000000
+Positive ratio: 0.00%
+
+======================================================================
+RULE 62
+======================================================================
+Feature       : PSH Flag Count
+Feature index : 46
+Range         : [1.0, 1.0]
+Class         : 0
+Samples       : 176
+Mean SHAP     : +0.000186
+Mean |SHAP|   : 0.003160
+Positive ratio: 60.80%
+
+======================================================================
+RULE 63
+======================================================================
+Feature       : Bwd IAT Std
+Feature index : 27
+Range         : [0.0, 44400000.0]
+Class         : 1
+Samples       : 393
+Mean SHAP     : -0.107765
+Mean |SHAP|   : 0.201975
+Positive ratio: 61.32%
+
+======================================================================
+RULE 64
+======================================================================
+Feature       : Init_Win_bytes_backward
+Feature index : 67
+Range         : [235.0, 6354.0]
+Class         : 1
+Samples       : 140
+Mean SHAP     : +0.015076
+Mean |SHAP|   : 0.052298
+Positive ratio: 50.00%
+
+======================================================================
+RULE 65
+======================================================================
+Feature       : Fwd IAT Mean
+Feature index : 21
+Range         : [3.0, 25100000.0]
+Class         : 1
+Samples       : 261
+Mean SHAP     : -0.044203
+Mean |SHAP|   : 0.342896
+Positive ratio: 52.11%
+
+======================================================================
+RULE 66
+======================================================================
+Feature       : Packet Length Mean
+Feature index : 40
+Range         : [2.0, 1292.5555419921875]
+Class         : 1
+Samples       : 334
+Mean SHAP     : -0.005309
+Mean |SHAP|   : 0.034978
+Positive ratio: 48.80%
+
+======================================================================
+RULE 67
+======================================================================
+Feature       : Fwd Header Length
+Feature index : 34
+Range         : [24.0, 72.0]
+Class         : 1
+Samples       : 198
+Mean SHAP     : -0.002498
+Mean |SHAP|   : 0.004423
+Positive ratio: 37.37%
+
+======================================================================
+RULE 68
+======================================================================
+Feature       : Fwd Packet Length Min
+Feature index : 7
+Range         : [6.0, 6.0]
+Class         : 1
+Samples       : 43
+Mean SHAP     : -0.002484
+Mean |SHAP|   : 0.012003
+Positive ratio: 62.79%
+
+======================================================================
+RULE 69
+======================================================================
+Feature       : Destination Port
+Feature index : 0
+Range         : [80.0, 7777.0]
+Class         : 1
+Samples       : 340
+Mean SHAP     : -0.003604
+Mean |SHAP|   : 0.026810
+Positive ratio: 53.82%
+
+======================================================================
+RULE 70
+======================================================================
+Feature       : Subflow Fwd Packets
+Feature index : 62
+Range         : [2.0, 7.0]
+Class         : 1
+Samples       : 214
+Mean SHAP     : +0.000007
+Mean |SHAP|   : 0.003768
+Positive ratio: 59.35%
+
+======================================================================
+RULE 71
+======================================================================
+Feature       : Fwd Packet Length Max
+Feature index : 6
+Range         : [6.0, 227.0]
+Class         : 1
+Samples       : 106
+Mean SHAP     : -0.002009
+Mean |SHAP|   : 0.021864
+Positive ratio: 46.23%
+
+======================================================================
+RULE 72
+======================================================================
+Feature       : Avg Fwd Segment Size
+Feature index : 53
+Range         : [8.666666984558105, 63.400001525878906]
+Class         : 1
+Samples       : 118
+Mean SHAP     : -0.000208
+Mean |SHAP|   : 0.004293
+Positive ratio: 52.54%
+
+======================================================================
+RULE 73
+======================================================================
+Feature       : Bwd Packet Length Max
+Feature index : 10
+Range         : [160.0, 8699.0]
+Class         : 1
+Samples       : 150
+Mean SHAP     : +0.027821
+Mean |SHAP|   : 0.058049
+Positive ratio: 54.67%
+
+======================================================================
+RULE 74
+======================================================================
+Feature       : Flow IAT Std
+Feature index : 17
+Range         : [16717.197265625, 26900000.0]
+Class         : 1
+Samples       : 153
+Mean SHAP     : +0.699097
+Mean |SHAP|   : 1.065775
+Positive ratio: 54.90%
+
+======================================================================
+RULE 75
+======================================================================
+Feature       : Subflow Bwd Packets
+Feature index : 64
+Range         : [1.0, 9.0]
+Class         : 1
+Samples       : 308
+Mean SHAP     : -0.000193
+Mean |SHAP|   : 0.009100
+Positive ratio: 49.03%
+
+======================================================================
+RULE 76
+======================================================================
+Feature       : Packet Length Variance
+Feature index : 42
+Range         : [2129869.5, 7826959.5]
+Class         : 1
+Samples       : 133
+Mean SHAP     : +0.121676
+Mean |SHAP|   : 0.462790
+Positive ratio: 54.14%
+
+======================================================================
+RULE 77
+======================================================================
+Feature       : Bwd Packets/s
+Feature index : 37
+Range         : [57.19514846801758, 35714.28515625]
+Class         : 1
+Samples       : 128
+Mean SHAP     : +0.015411
+Mean |SHAP|   : 0.212852
+Positive ratio: 60.16%
+
+======================================================================
+RULE 78
+======================================================================
+Feature       : Fwd Header Length.1
+Feature index : 55
+Range         : [40.0, 192.0]
+Class         : 1
+Samples       : 257
+Mean SHAP     : +0.000720
+Mean |SHAP|   : 0.003348
+Positive ratio: 57.20%
+
+======================================================================
+RULE 79
+======================================================================
+Feature       : Average Packet Size
+Feature index : 52
+Range         : [7.199999809265137, 1291.888916015625]
+Class         : 1
+Samples       : 192
+Mean SHAP     : -0.003280
+Mean |SHAP|   : 0.007091
+Positive ratio: 51.04%
+
+======================================================================
+RULE 80
+======================================================================
+Feature       : Fwd Packet Length Std
+Feature index : 9
+Range         : [10.263202667236328, 159.45281982421875]
+Class         : 1
+Samples       : 136
+Mean SHAP     : +0.005562
+Mean |SHAP|   : 0.017234
+Positive ratio: 61.03%
+
+======================================================================
+RULE 81
+======================================================================
+Feature       : Bwd IAT Min
+Feature index : 29
+Range         : [48.0, 209.0]
+Class         : 1
+Samples       : 64
+Mean SHAP     : -0.003262
+Mean |SHAP|   : 0.012976
+Positive ratio: 45.31%
+
+======================================================================
+RULE 82
+======================================================================
+Feature       : Flow IAT Max
+Feature index : 18
+Range         : [53.0, 7835802.0]
+Class         : 1
+Samples       : 153
+Mean SHAP     : +0.325357
+Mean |SHAP|   : 0.814901
+Positive ratio: 52.29%
+
+======================================================================
+RULE 83
+======================================================================
+Feature       : Flow IAT Mean
+Feature index : 16
+Range         : [45.0, 121270.8359375]
+Class         : 1
+Samples       : 130
+Mean SHAP     : -0.022828
+Mean |SHAP|   : 0.131487
+Positive ratio: 53.85%
+
+======================================================================
+RULE 84
+======================================================================
+Feature       : Idle Min
+Feature index : 77
+Range         : [6069867.0, 10000000.0]
+Class         : 1
+Samples       : 27
+Mean SHAP     : +0.205149
+Mean |SHAP|   : 0.898811
+Positive ratio: 55.56%
+
+======================================================================
+RULE 85
+======================================================================
+Feature       : Total Length of Fwd Packets
+Feature index : 4
+Range         : [342.0, 1045.0]
+Class         : 1
+Samples       : 85
+Mean SHAP     : +0.009464
+Mean |SHAP|   : 0.037975
+Positive ratio: 51.76%
+
+======================================================================
+RULE 86
+======================================================================
+Feature       : Bwd Packet Length Min
+Feature index : 11
+Range         : [6.0, 6.0]
+Class         : 1
+Samples       : 116
+Mean SHAP     : -0.006975
+Mean |SHAP|   : 0.027392
+Positive ratio: 40.52%
+
+======================================================================
+RULE 87
+======================================================================
+Feature       : Bwd IAT Max
+Feature index : 28
+Range         : [4.0, 4.0]
+Class         : 1
+Samples       : 0
+Mean SHAP     : +0.000000
+Mean |SHAP|   : 0.000000
+Positive ratio: 0.00%
+
+======================================================================
+RULE 88
+======================================================================
+Feature       : Flow Duration
+Feature index : 1
+Range         : [1.0, 100227920.0]
+Class         : 1
+Samples       : 378
+Mean SHAP     : -0.299012
+Mean |SHAP|   : 1.215531
+Positive ratio: 52.38%
+
+======================================================================
+RULE 89
+======================================================================
+Feature       : Fwd IAT Min
+Feature index : 24
+Range         : [3.0, 49.0]
+Class         : 1
+Samples       : 71
+Mean SHAP     : -0.033773
+Mean |SHAP|   : 0.046562
+Positive ratio: 47.89%
+
+======================================================================
+RULE 90
+======================================================================
+Feature       : Bwd IAT Mean
+Feature index : 26
+Range         : [18569.75, 24798.0]
+Class         : 1
+Samples       : 5
+Mean SHAP     : -0.236808
+Mean |SHAP|   : 0.236811
+Positive ratio: 20.00%
+
+======================================================================
+RULE 91
+======================================================================
+Feature       : Fwd IAT Max
+Feature index : 23
+Range         : [977.0, 106199.0]
+Class         : 1
+Samples       : 47
+Mean SHAP     : -0.244880
+Mean |SHAP|   : 0.637967
+Positive ratio: 46.81%
+
+======================================================================
+RULE 92
+======================================================================
+Feature       : Init_Win_bytes_forward
+Feature index : 66
+Range         : [256.0, 29200.0]
+Class         : 1
+Samples       : 280
+Mean SHAP     : -0.001719
+Mean |SHAP|   : 0.090455
+Positive ratio: 57.50%
+
+======================================================================
+RULE 93
+======================================================================
+Feature       : Bwd IAT Total
+Feature index : 25
+Range         : [1543.0, 1813023.0]
+Class         : 1
+Samples       : 133
+Mean SHAP     : +0.199859
+Mean |SHAP|   : 0.525926
+Positive ratio: 51.13%
+
+======================================================================
+RULE 94
+======================================================================
+Feature       : Bwd Header Length
+Feature index : 35
+Range         : [20.0, 200.0]
+Class         : 1
+Samples       : 268
+Mean SHAP     : -0.008844
+Mean |SHAP|   : 0.018803
+Positive ratio: 36.94%
+
+======================================================================
+RULE 95
+======================================================================
+Feature       : Flow Bytes/s
+Feature index : 14
+Range         : [19492.966796875, 1000000.0]
+Class         : 1
+Samples       : 141
+Mean SHAP     : +0.039801
+Mean |SHAP|   : 0.394668
+Positive ratio: 52.48%
+
+======================================================================
+RULE 96
+======================================================================
+Feature       : Idle Mean
+Feature index : 74
+Range         : [15000000.0, 99400000.0]
+Class         : 1
+Samples       : 114
+Mean SHAP     : -0.456965
+Mean |SHAP|   : 0.962574
+Positive ratio: 51.75%
+
+======================================================================
+RULE 97
+======================================================================
+Feature       : Avg Bwd Segment Size
+Feature index : 54
+Range         : [6.0, 2321.39990234375]
+Class         : 1
+Samples       : 278
+Mean SHAP     : +0.010256
+Mean |SHAP|   : 0.016911
+Positive ratio: 57.91%
+
+======================================================================
+RULE 98
+======================================================================
+Feature       : Flow Packets/s
+Feature index : 15
+Range         : [10.067973136901855, 44444.4453125]
+Class         : 1
+Samples       : 128
+Mean SHAP     : -0.007640
+Mean |SHAP|   : 0.181089
+Positive ratio: 39.06%
+
+======================================================================
+RULE 99
+======================================================================
+Feature       : Packet Length Std
+Feature index : 41
+Range         : [3.464101552963257, 1633.1026611328125]
+Class         : 1
+Samples       : 143
+Mean SHAP     : +0.001587
+Mean |SHAP|   : 0.025830
+Positive ratio: 49.65%
+
+======================================================================
+RULE 100
+======================================================================
+Feature       : Fwd IAT Std
+Feature index : 22
+Range         : [400.9295349121094, 4933041.0]
+Class         : 1
+Samples       : 93
+Mean SHAP     : -0.208917
+Mean |SHAP|   : 0.609816
+Positive ratio: 51.61%
+
+======================================================================
+RULE 101
+======================================================================
+Feature       : PSH Flag Count
+Feature index : 46
+Range         : [1.0, 1.0]
+Class         : 1
+Samples       : 176
+Mean SHAP     : +0.000186
+Mean |SHAP|   : 0.003160
+Positive ratio: 60.80%
+
+======================================================================
+RULE 102
+======================================================================
+Feature       : Active Min
+Feature index : 73
+Range         : [11911.0, 462116.0]
+Class         : 1
+Samples       : 24
+Mean SHAP     : +0.074752
+Mean |SHAP|   : 0.088368
+Positive ratio: 58.33%
+
+======================================================================
+RULE 103
+======================================================================
+Feature       : Flow IAT Min
+Feature index : 19
+Range         : [1.0, 1022.0]
+Class         : 1
+Samples       : 365
+Mean SHAP     : -0.001796
+Mean |SHAP|   : 0.050388
+Positive ratio: 52.88%
+
+======================================================================
+RULE 104
+======================================================================
+Feature       : Total Fwd Packets
+Feature index : 2
+Range         : [2.0, 2.0]
+Class         : 1
+Samples       : 44
+Mean SHAP     : +0.000547
+Mean |SHAP|   : 0.002691
+Positive ratio: 61.36%
+
+======================================================================
+RULE 105
+======================================================================
+Feature       : Idle Max
+Feature index : 76
+Range         : [9790574.0, 9790574.0]
+Class         : 1
+Samples       : 0
+Mean SHAP     : +0.000000
+Mean |SHAP|   : 0.000000
+Positive ratio: 0.00%
+
+======================================================================
+RULE 106
+======================================================================
+Feature       : Total Backward Packets
+Feature index : 3
+Range         : [4.0, 4.0]
+Class         : 1
+Samples       : 19
+Mean SHAP     : +0.002461
+Mean |SHAP|   : 0.009843
+Positive ratio: 42.11%
+
+======================================================================
+RULE 107
+======================================================================
+Feature       : Idle Std
+Feature index : 75
+Range         : [28.991378784179688, 28.991378784179688]
+Class         : 1
+Samples       : 0
+Mean SHAP     : +0.000000
+Mean |SHAP|   : 0.000000
+Positive ratio: 0.00%
+
+======================================================================
+RULE 108
+======================================================================
+Feature       : Bwd Packet Length Mean
+Feature index : 12
+Range         : [1934.5, 2901.75]
+Class         : 1
+Samples       : 64
+Mean SHAP     : -0.026219
+Mean |SHAP|   : 0.042687
+Positive ratio: 50.00%
+
+======================================================================
+RULE 109
+======================================================================
+Feature       : Fwd IAT Total
+Feature index : 20
+Range         : [1998.0, 1998.0]
+Class         : 1
+Samples       : 1
+Mean SHAP     : -2.570630
+Mean |SHAP|   : 2.570630
+Positive ratio: 0.00%
+
+======================================================================
+RULE 110
+======================================================================
+Feature       : Fwd Packets/s
+Feature index : 36
+Range         : [40816.328125, 40816.328125]
+Class         : 1
+Samples       : 0
+Mean SHAP     : +0.000000
+Mean |SHAP|   : 0.000000
+Positive ratio: 0.00%
+
+======================================================================
+RULE 111
+======================================================================
+Feature       : Total Length of Bwd Packets
+Feature index : 5
+Range         : [6.0, 6.0]
+Class         : 1
+Samples       : 115
+Mean SHAP     : +0.017061
+Mean |SHAP|   : 0.032305
+Positive ratio: 47.83%
+
+======================================================================
+RULE 112
+======================================================================
+Feature       : min_seg_size_forward
+Feature index : 69
+Range         : [20.0, 20.0]
+Class         : 1
+Samples       : 161
+Mean SHAP     : +0.000208
+Mean |SHAP|   : 0.001131
+Positive ratio: 44.10%
+
+======================================================================
+RULE 113
+======================================================================
+Feature       : Subflow Bwd Bytes
+Feature index : 65
+Range         : [6.0, 5182.0]
+Class         : 1
+Samples       : 123
+Mean SHAP     : +0.001435
+Mean |SHAP|   : 0.018752
+Positive ratio: 51.22%
+
+======================================================================
+RULE 114
+======================================================================
+Feature       : Max Packet Length
+Feature index : 39
+Range         : [6.0, 5792.0]
+Class         : 1
+Samples       : 276
+Mean SHAP     : +0.005847
+Mean |SHAP|   : 0.031112
+Positive ratio: 50.00%
+
+=== VALIDAZIONE REGOLE ===
+
+=== VALIDAZIONE ATTACK RULES ===
+Regole totali estratte: 114
+Regole ATTACK: 52
+Regole BENIGN scartate: 62
+Rule 14 VALIDATA: support=345, precision=0.9217, recall=0.3228, SHAP strength=0.2193, SHAP coverage=0.0239, priority=0.2021
+Rule 46 VALIDATA: support=173, precision=0.9653, recall=0.1695, SHAP strength=0.0282, SHAP coverage=0.0031, priority=0.0272
+
+Regole ATTACK validate: 2
+Scartate da supporto: 3 | precisione: 47
+
+Regole validate: 2
+Regole validate salvate in: Experiments/E1_train2000_val5000_test5000_seed42/rules/validated_rules.joblib
+
+=== TEST DELLE REGOLE ===
+
+Regole utilizzate: 2
+
+=== COVERAGE ATTACK RULES ===
+Test samples: 5000
+Rule-covered: 432
+No rule match: 4568
+Coverage: 0.0864
+Rule overrides FFCN: 101
+BENIGN -> ATTACK overrides: 101
+
+=== HYBRID FFCN + ATTACK RULES RESULTS ===
+Precision: 0.7390
+Recall: 0.8680
+F1: 0.7983
+1 ['(', '2129869.5', '<=', 'Packet Length Variance', 'Feature:', 42, '<=', '7826959.5', ')', 1]
+2 ['(', '1934.5', '<=', 'Bwd Packet Length Mean', 'Feature:', 12, '<=', '2901.75', ')', 1]
+
+Regole validate: 2
+
+Evaluation delle regole completata.
+
+[Done] exited with code=0 in 58.207 seconds
+

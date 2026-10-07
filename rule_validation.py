@@ -352,86 +352,86 @@ def validate_rules(
 
         feature_shap_values = {}
 
-        if (
-            shap_importance is not None
-            and rule_features
-        ):
+        # if (
+        #     shap_importance is not None
+        #     and rule_features
+        # ):
 
-            valid_features = [
+        #     valid_features = [
 
-                feature
+        #         feature
 
-                for feature in rule_features
+        #         for feature in rule_features
 
-                if (
-                    0
-                    <= feature
-                    < len(shap_importance)
-                )
+        #         if (
+        #             0
+        #             <= feature
+        #             < len(shap_importance)
+        #         )
 
-            ]
+        #     ]
 
-            if valid_features:
+        #     if valid_features:
 
-                values = np.asarray(
+        #         values = np.asarray(
 
-                    [
-                        shap_importance[
-                            feature
-                        ]
+        #             [
+        #                 shap_importance[
+        #                     feature
+        #                 ]
 
-                        for feature
-                        in valid_features
+        #                 for feature
+        #                 in valid_features
 
-                    ],
+        #             ],
 
-                    dtype=float
+        #             dtype=float
 
-                )
+        #         )
 
-                # ------------------------------------------
-                # SHAP value per feature
-                # ------------------------------------------
+        #         # ------------------------------------------
+        #         # SHAP value per feature
+        #         # ------------------------------------------
 
-                feature_shap_values = {
+        #         feature_shap_values = {
 
-                    int(feature):
-                    float(
-                        shap_importance[
-                            feature
-                        ]
-                    )
+        #             int(feature):
+        #             float(
+        #                 shap_importance[
+        #                     feature
+        #                 ]
+        #             )
 
-                    for feature
-                    in valid_features
+        #             for feature
+        #             in valid_features
 
-                }
+        #         }
 
-                # ------------------------------------------
-                # Forza media delle feature della regola
-                #
-                # 0 -> feature poco importante
-                # 1 -> feature più importante
-                # ------------------------------------------
+        #         # ------------------------------------------
+        #         # Forza media delle feature della regola
+        #         #
+        #         # 0 -> feature poco importante
+        #         # 1 -> feature più importante
+        #         # ------------------------------------------
 
-                if shap_max > 0:
+        #         if shap_max > 0:
 
-                    shap_strength = (
-                        np.mean(values)
-                        / shap_max
-                    )
+        #             shap_strength = (
+        #                 np.mean(values)
+        #                 / shap_max
+        #             )
 
-                # ------------------------------------------
-                # Quota della SHAP importance globale
-                # rappresentata dalle feature della regola.
-                # ------------------------------------------
+        #         # ------------------------------------------
+        #         # Quota della SHAP importance globale
+        #         # rappresentata dalle feature della regola.
+        #         # ------------------------------------------
 
-                if shap_total > 0:
+        #         if shap_total > 0:
 
-                    shap_coverage = (
-                        np.sum(values)
-                        / shap_total
-                    )
+        #             shap_coverage = (
+        #                 np.sum(values)
+        #                 / shap_total
+        #             )
 
         # ----------------------------------------------------
         # MATCH VALIDATION

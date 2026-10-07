@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 import shap
 import matplotlib.pyplot as plt
-
+from pathlib import Path
 class AttackScoreModel(tf.keras.Model):
     """
     Wrapper della FFCN utilizzato da SHAP.
@@ -418,32 +418,175 @@ def compute_attack_shap_importance(
 
 
 
-def get_top_shap_features(importance, top_k):
-    """Restituisce gli indici delle feature con importanza SHAP maggiore."""
-    importance = np.asarray(importance, dtype=float).reshape(-1)
-    top_k = int(top_k)
+def get_top_shap_features(importance, top_k=20):
+    """Return the indices of the ``top_k`` most important features."""
+    importance = np.asarray(importance).reshape(-1)
+    if importance.size == 0:
+        return set()
 
-    if top_k < 0:
-        raise ValueError("top_k deve essere >= 0")
-
+    top_k = max(0, min(int(top_k), importance.size))
     ranking = np.argsort(importance)[::-1]
     return set(int(index) for index in ranking[:top_k])
 
 
-def show_shap(shap_values, X_explain, selected_features):
-    
-    shap_values= np.asarray(shap_values)
-    X_explain= np.asarray(X_explain)
- 
-    explanation = shap.Explanation(
+def show_shap(
+    shap_values,
+    X_explain,
+    selected_features,
+    output_dir="."
+):
 
-        values=shap_values,
-
-        data=X_explain,
-
-        feature_names=selected_features
-
+    output_dir = Path(output_dir).expanduser()
+    output_dir.mkdir(
+        parents=True,
+        exist_ok=True
     )
-    shap.plots.beeswarm(explanation, max_display=20)
-    shap.plots.bar(explanation, max_display= 20)
-    
+
+    shap_values = np.asarray(shap_values)
+    X_explain = np.asarray(X_explain)
+
+    explanation = shap.Explanation(
+        values=shap_values,
+        data=X_explain,
+        feature_names=selected_features
+    )
+
+    # BEESWARM
+    shap.plots.beeswarm(
+        explanation,
+        max_display=20,
+        show=False
+    )
+
+    fig = plt.gcf()
+
+    beeswarm_paths = (
+        output_dir / "shap_beeswarm.png",
+        output_dir / "shap_beeswarm.pdf"
+    )
+
+    for path in beeswarm_paths:
+        fig.savefig(
+            path,
+            dpi=300,
+            bbox_inches="tight"
+        )
+
+    plt.close(fig)
+
+
+    # ========================================================
+    # BAR
+    # ========================================================
+
+    shap.plots.bar(
+        explanation,
+        max_display=20,
+        show=False
+    )
+
+    fig = plt.gcf()
+
+    bar_paths = (
+        output_dir / "shap_barplot.png",
+        output_dir / "shap_barplot.pdf"
+    )
+
+    for path in bar_paths:
+        fig.savefig(
+            path,
+            dpi=300,
+            bbox_inches="tight"
+        )
+
+    plt.close(fig)
+
+
+    print(
+        f"\n[SHAP] Beeswarm salvato: "
+        f"{beeswarm_paths[0].resolve()} e "
+        f"{beeswarm_paths[1].resolve()}"
+    )
+
+    print(
+        f"[SHAP] Bar plot salvato: "
+        f"{bar_paths[0].resolve()} e "
+        f"{bar_paths[1].resolve()}"
+    )
+
+
+
+
+def logic_shap(X_explain,
+    shap_values,
+    rule_set):
+    results = []
+    for rule in rule_set:
+        feature_index = int(rule[5])
+        lower = float(rule[1])
+        upper = float(rule[7])
+
+        feature_values = np.asarray(X_explain)[:, feature_index]
+        feature_shap = np.asarray(shap_values)[:, feature_index]
+
+        mask = (
+            (feature_values <= upper) &
+            (feature_values >= lower)
+        )
+
+        selected_shap = feature_shap[mask]
+        n_samples = len(selected_shap)
+
+        if n_samples == 0:
+            result = {
+                "feature_index": feature_index,
+                "lower": lower,
+                "upper": upper,
+                "n_samples": 0,
+                "mean_shap": 0.0,
+                "mean_abs_shap": 0.0,
+                "positive_ratio": 0.0,
+                "shap_score": 0.0,
+            }
+        else:
+            mean_shap = float(np.mean(selected_shap))
+            mean_abs_shap = float(np.mean(np.abs(selected_shap)))
+            positive_ratio = float(np.mean(selected_shap > 0))
+
+            result = {
+                "feature_index": feature_index,
+                "lower": lower,
+                "upper": upper,
+                "n_samples": n_samples,
+                "mean_shap": mean_shap,
+                "mean_abs_shap": mean_abs_shap,
+                "positive_ratio": positive_ratio,
+                "shap_score": mean_shap,
+            }
+        results.append(result)
+
+    return results
+        
+
+   
+   
+def print_shap_rules(rule_set, shap_results, feature_names):
+
+    for i, (rule, result) in enumerate(zip(rule_set, shap_results), start=1):
+
+        feature_index = result["feature_index"]
+        feature_name = feature_names[feature_index]
+
+        print("\n" + "=" * 70)
+        print(f"RULE {i}")
+        print("=" * 70)
+
+        print(f"Feature       : {feature_name}")
+        print(f"Feature index : {feature_index}")
+        print(f"Range         : [{result['lower']}, {result['upper']}]")
+        print(f"Class         : {rule[9]}")
+
+        print(f"Samples       : {result['n_samples']}")
+        print(f"Mean SHAP     : {result['mean_shap']:+.6f}")
+        print(f"Mean |SHAP|   : {result['mean_abs_shap']:.6f}")
+        print(f"Positive ratio: {result['positive_ratio']:.2%}")
